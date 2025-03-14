@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Extension Options</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+            rel="stylesheet" />
+        <style>
+            body {
+                font-family: 'Roboto', sans-serif;
+                margin: 20px;
+                background-color: #f0f4ff;
+                color: #333;
+            }
+            h1 {
+                color: #0056b3;
+            }
+            h2 {
+                color: #ff8c00;
+            }
+            p {
+                margin-bottom: 15px;
+            }
+            label,
+            input,
+            select {
+                display: block;
+                margin-bottom: 10px;
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                font-size: 16px;
+            }
+            input:focus,
+            select:focus {
+                border-color: #0056b3;
+                outline: none;
+            }
+            button {
+                background-color: #ffcc00;
+                color: #333;
+                border: none;
+                border-radius: 5px;
+                padding: 10px 15px;
+                font-size: 16px;
+                cursor: pointer;
+            }
+            button:hover {
+                background-color: #ffb300;
+            }
+            #status {
+                margin-top: 15px;
+                font-weight: bold;
+            }
+            a {
+                color: #0056b3;
+                text-decoration: none;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Extension options</h1>
+        <p>
+            This extension allows you to submit URLs for assessment using
+            <strong>urlscan.io</strong>. To use this feature, you need to
+            register for an account and obtain an API key.
+        </p>
+        <ul>
+            <li>
+                To register an account, visit:
+                <a href="https://urlscan.io/user/signup" target="_blank"
+                    >urlscan.io Signup</a
+                >
+            </li>
+            <li>
+                To obtain an API key, visit:
+                <a href="https://urlscan.io/user/apikey/new/" target="_blank"
+                    >urlscan.io API Key</a
+                >
+            </li>
+        </ul>
+        <p>
+            Once you obtained your API key, please fill out the details below.
+            Keep your API-key private and never share it, because the key is
+            personal and bound to your account. This extension only stores the
+            API-key in localy, using Firefox storage database.
+        </p>
+
+        <h2>Enter Your urlscan.io API Key</h2>
+        <div>
+            <label for="apiKey">API Key:</label>
+            <input
+                type="text"
+                id="apiKey"
+                placeholder="Enter your urlscan.io API Key"
+                required />
+        </div>
+        <div>
+            <label for="visibility">Visibility:</label>
+            <select id="visibility" required>
+                <option value="public">Public</option>
+                <option value="unlisted" selected∏>Unlisted</option>
+                <option value="private">Private</option>
+            </select>
+        </div>
+        <button id="save">Save</button>
+        <p id="status"></p>
+
+        <!-- Link to external script -->
+        <script src="options.js"></script>
+
+        <h2>Copyrights and Notices</h2>
+        <p>Build and maintained by: Paul Rutten (info@paulrutten.nl)</p>
+        <p>
+            This extension utilizes technology from
+            <a href="https://urlscan.io/impressum/" target="_blank"
+                >urlscan GmbH ©</a
+            >
+            and
+            <a href="https://securitytrails.com/" target="_blank"
+                >Security Trails ©</a
+            >.
+        </p>
+        <p>
+            For more information, please refer to their respective documentation
+            and terms of service.
+        </p>
+    </body>
+</html>

@@ -1,0 +1,35 @@
+{
+    "manifest_version": 2,
+    "name": "Verify link with urlscan.io",
+    "short_name": "urlscanner",
+    "author": "Paul Rutten",
+    "developer": {
+        "name": "Paul Rutten",
+        "url": "https://www.paulrutten.nl"
+    },
+    "version": "1.0",
+    "description": "Right-click hyperlinks to send them to urlscan.io and view the results.",
+    "permissions": [
+        "contextMenus",
+        "activeTab",
+        "tabs",
+        "storage",
+        "notifications",
+        "https://urlscan.io/*"
+    ],
+    "icons": {
+        "16": "icons/urlscan_16.png",
+        "32": "icons/urlscan_32.png"
+    },
+    "options_ui": {
+        "page": "options.html"
+    },
+    "background": {
+        "scripts": ["background.js"]
+    },
+    "applications": {
+        "gecko": {
+            "id": "send-nudes@paulrutten.nl"
+        }
+    }
+}
