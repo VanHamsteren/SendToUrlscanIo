@@ -3,10 +3,6 @@
     "name": "Verify link with urlscan.io",
     "short_name": "urlscanner",
     "author": "Paul Rutten",
-    "developer": {
-        "name": "Paul Rutten",
-        "url": "https://www.paulrutten.nl"
-    },
     "version": "1.0",
     "description": "Right-click hyperlinks to send them to urlscan.io and view the results.",
     "permissions": [
@@ -29,7 +25,7 @@
     },
     "applications": {
         "gecko": {
-            "id": "send-nudes@paulrutten.nl"
+            "id": "urlscanner@paulrutten.nl"
         }
     }
 }

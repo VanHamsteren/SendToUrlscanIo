@@ -1,154 +1,123 @@
-// Function to send the URL to urlscan.io
 async function sendToUrlscan(url) {
-    const apiEndpoint = 'https://urlscan.io/api/v1/scan/';
+    const API_ENDPOINT = 'https://urlscan.io/api/v1/scan/';
+    
     try {
-        const { urlscanApiKey: apiKey } = await browser.storage.sync.get(
-            'urlscanApiKey'
-        );
-        const { urlscanVisibility: visibility } =
-            await browser.storage.sync.get('urlscanVisibility');
+        // Load settings in one call
+        const { urlscanApiKey: apiKey, urlscanVisibility: visibility } = 
+            await browser.storage.sync.get(['urlscanApiKey', 'urlscanVisibility']);
 
-        if (!apiKey) {
-            notifyUser(
-                'Error',
-                'No API key set. Please configure the extension.'
-            );
-            console.error('No API key set. Please configure the extension.');
+        if (!apiKey || !visibility) {
+            notifyError('Missing Configuration', 'Set API key and visibility in the extension options.');
             return;
         }
-
-        if (!visibility) {
-            notifyUser(
-                'Error',
-                'No visibility set. Please configure the extension.'
-            );
-            console.error('No visibility set. Please configure the extension.');
-            return;
-        }
-
-        console.log('Using API Key:', apiKey);
 
         const payload = {
-            url: url,
-            visibility: visibility,
-            tags: ['demotag1', 'demotag2'], // Example tags
+            url,
+            visibility,
+            tags: ['demotag1', 'demotag2']
         };
 
-        const response = await fetch(apiEndpoint, {
+        const response = await fetch(API_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'API-Key': apiKey,
+                'API-Key': apiKey
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            const status = errorData.status; // Get the status code
-            const errorMessage = errorData.message || 'Unknown error occurred';
-            const errorDescription =
-                errorData.description || 'No description available';
-
-            // Notify user with detailed error information
-            notifyUser(
-                'Error',
-                `Error (${status}) - ${errorMessage}\n${errorDescription}`
+            const errorData = await response.json().catch(() => ({}));
+            notifyError(
+                `API Error (${response.status})`,
+                errorData.message || 'Unknown error from urlscan.io'
             );
-            console.error('Scan submission failed:', errorData);
-            throw new Error(errorMessage);
+            throw new Error(errorData.message || 'Scan submission failed');
         }
 
         const data = await response.json();
-        console.log('Scan submission successful:', data);
-        notifyUser('Success', 'Scan submission successful!');
-
-        if (data?.uuid) {
+        notifySuccess('Scan submitted successfully!');
+        
+        if (data.uuid) {
             pollForScanResult(data.uuid, apiKey);
         }
-    } catch (error) {
-        // If the error is an object with a status, message, and description
-        if (error instanceof Error && error.message) {
-            const status = error.status || 'Unknown';
-            const message = error.message || 'An error occurred';
-            const description = error.description || 'No description available';
 
-            notifyUser(
-                `Error (${status})`,
-                `Error: ${message}\n${description}`
-            );
-        } else {
-            // Fallback for unexpected error types
-            notifyUser(
-                'Error',
-                `An unexpected error occurred: ${error.message}`
-            );
-        }
-        console.error('Error:', error);
+    } catch (error) {
+        notifyError('Unexpected Error', error.message || 'An unexpected error occurred');
+        console.error(error);
     }
 }
 
-async function pollForScanResult(uuid, apiKey) {
-    const resultEndpoint = `https://urlscan.io/api/v1/result/${uuid}/`;
+// Poll scan result until available
+function pollForScanResult(uuid, apiKey) {
+    const RESULT_ENDPOINT = `https://urlscan.io/api/v1/result/${uuid}/`;
 
-    const checkScan = async () => {
+    let attempts = 0;
+    const MAX_ATTEMPTS = 15; // Stop after ~30s (2s interval + 10s initial delay)
+
+    const intervalId = setInterval(async () => {
+        attempts++;
         try {
-            const response = await fetch(resultEndpoint, {
-                headers: {
-                    'API-Key': apiKey,
-                },
+            const response = await fetch(RESULT_ENDPOINT, {
+                headers: { 'API-Key': apiKey }
             });
 
             if (response.ok) {
-                const data = await response.json();
-                const resultUrl = `https://urlscan.io/result/${uuid}/`;
-                browser.tabs.create({ url: resultUrl });
+                clearInterval(intervalId);
+                browser.tabs.create({ url: `https://urlscan.io/result/${uuid}/` });
             } else if (response.status === 404) {
-                console.log('Scan in progress, polling again...');
-                setTimeout(checkScan, 2000); // Poll again in 2 seconds
+                console.log(`Scan not ready yet (attempt ${attempts})...`);
+                if (attempts >= MAX_ATTEMPTS) {
+                    clearInterval(intervalId);
+                    notifyError('Timeout', 'Scan did not complete in time.');
+                }
             } else {
-                const errorText = await response.text();
-                notifyUser(
-                    'Error',
-                    `Error fetching scan result: ${response.status} - ${errorText}`
-                );
-                console.error('Error fetching scan result:', response);
-                console.error('Response body:', errorText);
+                clearInterval(intervalId);
+                const text = await response.text();
+                notifyError(`Error ${response.status}`, text);
             }
         } catch (error) {
-            notifyUser('Error', `Error during polling: ${error.message}`);
-            console.error('Error during polling:', error);
+            clearInterval(intervalId);
+            notifyError('Polling Error', error.message);
         }
-    };
+    }, 2000);
 
-    setTimeout(checkScan, 10000); // Start polling after 10 seconds
+    // Start polling after 10 seconds delay
+    setTimeout(() => intervalId, 10000);
 }
 
-// Function to notify the user
+// ---- Notification Helpers ----
 function notifyUser(title, message) {
     browser.notifications.create({
         type: 'basic',
-        iconUrl: 'icons/urlscan_32.png', // Change to your icon path
-        title: title,
-        message: message,
-        priority: 2,
+        iconUrl: 'icons/urlscan_32.png',
+        title,
+        message,
+        priority: 2
     });
 }
 
-// Listener for context menu clicks
-browser.contextMenus.onClicked.addListener((info) => {
-    if (info.menuItemId === 'sendToUrlscan' && info.linkUrl) {
-        sendToUrlscan(info.linkUrl);
-    }
-});
+function notifySuccess(message) {
+    notifyUser('Success', message);
+}
 
-// Create the context menu
+function notifyError(title, message) {
+    notifyUser(title, message);
+}
+
+// ---- Context Menu Setup ----
 browser.contextMenus.create({
     id: 'sendToUrlscan',
     title: 'Send to urlscan.io',
     contexts: ['link'],
     icons: {
         16: 'icons/urlscan_16.png',
-        32: 'icons/urlscan_32.png',
-    },
+        32: 'icons/urlscan_32.png'
+    }
+});
+
+browser.contextMenus.onClicked.addListener((info) => {
+    if (info.menuItemId === 'sendToUrlscan' && info.linkUrl) {
+        sendToUrlscan(info.linkUrl);
+    }
 });
