@@ -1,3 +1,4 @@
+/* global browser */
 /**
  * URLScan.io Extension - Options Page Script
  * Handles settings management and user interactions
