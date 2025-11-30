@@ -181,7 +181,10 @@ async function addToNextDnsList(profileId, profileName, domain, listType) {
             return;
         }
 
-        const endpoint = `https://api.nextdns.io/profiles/${profileId}/${listType}/${domain}`;
+        // NextDNS API endpoint - note: uses 'privacy' path
+        const endpoint = `https://api.nextdns.io/profiles/${profileId}/privacy/${listType}/${domain}`;
+        
+        console.log(`Calling NextDNS API: PUT ${endpoint}`);
         
         const response = await fetch(endpoint, {
             method: 'PUT',
@@ -192,6 +195,8 @@ async function addToNextDnsList(profileId, profileName, domain, listType) {
             body: JSON.stringify({ active: true })
         });
 
+        console.log(`NextDNS API response: ${response.status}`);
+
         if (response.ok || response.status === 204) {
             const listName = listType === 'denylist' ? 'blocklist' : 'allowlist';
             notifySuccess(`NextDNS: Added "${domain}" to ${listName} in profile "${profileName}"`);
@@ -199,7 +204,7 @@ async function addToNextDnsList(profileId, profileName, domain, listType) {
         } else {
             const errorText = await response.text().catch(() => 'Unknown error');
             notifyError(
-                `NextDNS API Error (${response.status})`,
+                `NextDNS API Error: ${response.status}`,
                 errorText || 'Failed to add domain to list'
             );
             console.error('NextDNS API Error:', response.status, errorText);
