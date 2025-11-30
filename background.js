@@ -814,12 +814,6 @@ function notifyError(title, message) {
     notifyUser(`✗ ${title}`, message);
 }
 
-// ---- Toolbar Button Action ----
-// Open options page when toolbar icon is clicked
-browser.action.onClicked.addListener(() => {
-    browser.runtime.openOptionsPage();
-});
-
 // ---- Message Handling for Options Page ----
 // Handle messages from options page (for testing API connection)
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
