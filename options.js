@@ -121,7 +121,7 @@ toggleNextDnsBtn.addEventListener('click', () => {
 });
 
 /**
- * Test NextDNS connection
+ * Test NextDNS connection via background script
  */
 testNextDnsBtn.addEventListener('click', async () => {
     const apiKey = nextdnsApiKeyInput.value.trim();
@@ -137,16 +137,16 @@ testNextDnsBtn.addEventListener('click', async () => {
     testNextDnsBtn.innerHTML = '<span class="loading"></span> Testing...';
     
     try {
-        console.log('Testing NextDNS API connection...');
-        const response = await fetch('https://api.nextdns.io/profiles', {
-            headers: {
-                'X-Api-Key': apiKey
-            }
+        console.log('Testing NextDNS API connection via background script...');
+        
+        // Send message to background script
+        const response = await browser.runtime.sendMessage({
+            action: 'testNextDnsConnection',
+            apiKey: apiKey
         });
         
-        if (response.ok) {
-            const data = await response.json();
-            const profiles = data.data || [];
+        if (response.success) {
+            const profiles = response.profiles;
             
             if (profiles.length > 0) {
                 showStatus(`✓ Connection successful! Found ${profiles.length} profile(s): ${profiles.map(p => p.name || p.id).join(', ')}`, true);
@@ -161,12 +161,11 @@ testNextDnsBtn.addEventListener('click', async () => {
                 showStatus('⚠️ Connection successful but no profiles found. Create a profile at nextdns.io', false);
             }
         } else {
-            const errorText = await response.text().catch(() => 'Unknown error');
-            showStatus(`✗ Connection failed (${response.status}): ${errorText}. Check your API key.`, false);
-            console.error('NextDNS API error:', response.status, errorText);
+            showStatus(`✗ Connection failed: ${response.error}. Check your API key.`, false);
+            console.error('NextDNS API error:', response);
         }
     } catch (error) {
-        showStatus(`✗ Network error: ${error.message}. Check your internet connection.`, false);
+        showStatus(`✗ Error: ${error.message}`, false);
         console.error('NextDNS connection error:', error);
     } finally {
         testNextDnsBtn.disabled = false;
