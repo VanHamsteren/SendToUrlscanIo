@@ -217,13 +217,16 @@ function extractDomain(url) {
  * @param {string} profileName - Profile name for display
  * @param {string} domain - Domain to add
  * @param {string} listType - 'denylist' or 'allowlist'
+ * @param {boolean} silent - If true, don't show notifications (for bulk operations)
  */
-async function addToNextDnsList(profileId, profileName, domain, listType) {
+async function addToNextDnsList(profileId, profileName, domain, listType, silent = false) {
     try {
         const { nextdnsApiKey: apiKey } = await browser.storage.sync.get(['nextdnsApiKey']);
 
         if (!apiKey) {
-            notifyError('NextDNS Configuration Missing', 'Please set your NextDNS API key in the extension options.');
+            if (!silent) {
+                notifyError('NextDNS Configuration Missing', 'Please set your NextDNS API key in the extension options.');
+            }
             return;
         }
 
@@ -248,20 +251,28 @@ async function addToNextDnsList(profileId, profileName, domain, listType) {
 
         if (response.ok || response.status === 201 || response.status === 204) {
             const listName = listType === 'denylist' ? 'blocklist' : 'allowlist';
-            notifySuccess(`NextDNS: Added "${domain}" to ${listName} in profile "${profileName}"`);
+            if (!silent) {
+                notifySuccess(`NextDNS: Added "${domain}" to ${listName} in profile "${profileName}"`);
+            }
             console.log(`NextDNS: Successfully added ${domain} to ${listType} in profile ${profileId}`);
         } else {
             const errorText = await response.text().catch(() => 'Unknown error');
-            notifyError(
-                `NextDNS API Error: ${response.status}`,
-                errorText || 'Failed to add domain to list'
-            );
+            if (!silent) {
+                notifyError(
+                    `NextDNS API Error: ${response.status}`,
+                    errorText || 'Failed to add domain to list'
+                );
+            }
             console.error('NextDNS API Error:', response.status, errorText);
+            throw new Error(`API Error ${response.status}`);
         }
 
     } catch (error) {
         console.error('NextDNS unexpected error:', error);
-        notifyError('NextDNS Error', error.message || 'An unexpected error occurred.');
+        if (!silent) {
+            notifyError('NextDNS Error', error.message || 'An unexpected error occurred.');
+        }
+        throw error;
     }
 }
 
