@@ -152,18 +152,41 @@ function pollForScanResult(uuid, apiKey) {
 
 /**
  * Extract domain from URL or text
- * Handles special cases like URLScan.io result pages
+ * Handles special cases like URLScan.io result pages and Outlook Safe Links
  * @param {string} url - Full URL or text
  * @returns {string} Domain only
  */
 function extractDomain(url) {
     try {
+        // Check if this is an Outlook Safe Links URL
+        // Format: https://*/safelinks.protection.outlook.com/?url=<encoded_url>&...
+        if (url.includes('safelinks.protection.outlook.com') || 
+            url.includes('nam.safelinks.protection.outlook.com') ||
+            url.includes('emea.safelinks.protection.outlook.com') ||
+            url.includes('apac.safelinks.protection.outlook.com') ||
+            url.match(/[a-z]{2,4}\d{2}\.safelinks\.protection\.outlook\.com/)) {
+            
+            try {
+                const urlObj = new URL(url);
+                const actualUrl = urlObj.searchParams.get('url');
+                if (actualUrl) {
+                    const decodedUrl = decodeURIComponent(actualUrl);
+                    console.log(`Outlook Safe Link detected. Original: ${url.substring(0, 80)}...`);
+                    console.log(`Extracted actual URL: ${decodedUrl}`);
+                    // Recursively extract domain from the actual URL
+                    return extractDomain(decodedUrl);
+                }
+            } catch (error) {
+                console.error('Failed to extract from Outlook Safe Link:', error);
+            }
+        }
+        
         // Check if this is a URLScan.io result page
         // Format: urlscan.io/domain/example.com or urlscan.io/result/UUID
         if (url.includes('urlscan.io/domain/')) {
             const match = url.match(/urlscan\.io\/domain\/([^\/\?#]+)/);
             if (match && match[1]) {
-                console.log(`Extracted domain from URLScan: ${match[1]}`);
+                console.log(`URLScan.io domain page detected. Extracted: ${match[1]}`);
                 return match[1];
             }
         }
