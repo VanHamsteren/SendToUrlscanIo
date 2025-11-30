@@ -42,20 +42,35 @@ A professional Firefox extension that integrates multiple security analysis tool
 
 ## Setup
 
-1. **Get an API Key**: 
-   - Register at [urlscan.io](https://urlscan.io/user/signup)
-   - Generate your API key from your [profile page](https://urlscan.io/user/profile/)
+### 1. Get API Keys
 
-2. **Configure Extension**:
-   - Click the URLScan.io extension icon in your Firefox toolbar
-   - Enter your API key
-   - Choose scan visibility (Public/Unlisted/Private)
-   - Optionally customize tags (default: `firefox, extension`)
+**URLScan.io:**
+- Register at [urlscan.io](https://urlscan.io/user/signup)
+- Get your API key from [profile page](https://urlscan.io/user/profile/)
 
-3. **Start Scanning**:
-   - Right-click any link on a webpage
-   - Select "Scan with urlscan.io"
-   - Wait for the scan to complete (results open automatically)
+**NextDNS (Optional):**
+- Register at [NextDNS](https://my.nextdns.io/signup)
+- Get your API key from [account settings](https://my.nextdns.io/account)
+
+### 2. Configure Extension
+
+- Click the extension icon in your Firefox toolbar
+- Enter your URLScan.io API key
+- (Optional) Enter your NextDNS API key
+- Choose scan visibility (Public/Unlisted/Private)
+- Customize tags (default: `firefox, extension`)
+- Click "Save All Settings"
+
+### 3. Start Using
+
+**URLScan.io:**
+- Right-click any link → Security Analysis → Scan with URLScan.io
+- Wait for scan to complete (results open automatically)
+
+**NextDNS:**
+- Right-click any link → Security Analysis → NextDNS
+- Choose "Add to Blocklist" or "Add to Allowlist"
+- Select which profile to add the domain to
 
 ## Technical Details
 
