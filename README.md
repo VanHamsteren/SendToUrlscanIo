@@ -174,6 +174,8 @@ To test the extension:
 **Powered by**: 
 - [urlscan.io](https://urlscan.io/) - Website security scanner
 - [urlscan.io API](https://urlscan.io/docs/api/) - Public API
+- [NextDNS](https://nextdns.io/) - DNS-level security and privacy
+- [NextDNS API](https://nextdns.github.io/api/) - Public API
 
 ## License
 
