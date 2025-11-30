@@ -3,123 +3,449 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Extension Options</title>
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+        <title>URLScan.io Extension - Settings</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
             body {
-                font-family: "Roboto", sans-serif;
-                margin: 20px;
-                background-color: #f0f4ff;
+                font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
                 color: #333;
+                min-height: 100vh;
+                padding: 40px 20px;
+                line-height: 1.6;
             }
 
-            h1 {
-                color: #0056b3;
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                overflow: hidden;
             }
 
-            h2 {
-                color: #ff8c00;
+            .header {
+                background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+                color: white;
+                padding: 40px;
+                text-align: center;
             }
 
-            p {
-                margin-bottom: 15px;
-            }
-
-            label,
-            input,
-            select {
-                display: block;
+            .header h1 {
+                font-size: 32px;
+                font-weight: 700;
                 margin-bottom: 10px;
-                padding: 10px;
-                border: 1px solid #ccc;
-                border-radius: 5px;
-                font-size: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
             }
 
-            input:focus,
-            select:focus {
-                border-color: #0056b3;
+            .header p {
+                font-size: 16px;
+                opacity: 0.95;
+            }
+
+            .content {
+                padding: 40px;
+            }
+
+            .info-box {
+                background: #eff6ff;
+                border-left: 4px solid #2563eb;
+                padding: 20px;
+                border-radius: 8px;
+                margin-bottom: 30px;
+            }
+
+            .info-box h2 {
+                color: #1e40af;
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 12px;
+            }
+
+            .info-box p {
+                color: #1e40af;
+                font-size: 14px;
+                margin-bottom: 8px;
+            }
+
+            .info-box ul {
+                list-style: none;
+                margin-top: 12px;
+            }
+
+            .info-box li {
+                padding: 8px 0;
+                color: #1e40af;
+            }
+
+            .info-box a {
+                color: #2563eb;
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.2s;
+            }
+
+            .info-box a:hover {
+                color: #1d4ed8;
+                text-decoration: underline;
+            }
+
+            .form-section {
+                margin-bottom: 30px;
+            }
+
+            .form-section h2 {
+                color: #1e3a8a;
+                font-size: 20px;
+                font-weight: 600;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #e5e7eb;
+            }
+
+            .form-group {
+                margin-bottom: 24px;
+            }
+
+            label {
+                display: block;
+                font-weight: 600;
+                color: #374151;
+                margin-bottom: 8px;
+                font-size: 14px;
+            }
+
+            .label-description {
+                font-weight: 400;
+                color: #6b7280;
+                font-size: 13px;
+                margin-top: 4px;
+            }
+
+            .input-wrapper {
+                position: relative;
+            }
+
+            input[type="text"],
+            input[type="password"],
+            select,
+            textarea {
+                width: 100%;
+                padding: 12px 16px;
+                border: 2px solid #e5e7eb;
+                border-radius: 8px;
+                font-size: 15px;
+                font-family: inherit;
+                transition: all 0.2s;
+                background: white;
+            }
+
+            input[type="text"]:focus,
+            input[type="password"]:focus,
+            select:focus,
+            textarea:focus {
+                border-color: #2563eb;
                 outline: none;
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            }
+
+            input.error,
+            select.error,
+            textarea.error {
+                border-color: #ef4444;
+            }
+
+            .toggle-password {
+                position: absolute;
+                right: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: none;
+                border: none;
+                color: #6b7280;
+                cursor: pointer;
+                padding: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                transition: color 0.2s;
+            }
+
+            .toggle-password:hover {
+                color: #2563eb;
+            }
+
+            textarea {
+                resize: vertical;
+                min-height: 80px;
+                font-family: inherit;
+            }
+
+            .input-hint {
+                font-size: 13px;
+                color: #6b7280;
+                margin-top: 6px;
+            }
+
+            .error-message {
+                color: #ef4444;
+                font-size: 13px;
+                margin-top: 6px;
+                display: none;
+            }
+
+            .error-message.show {
+                display: block;
+            }
+
+            .button-group {
+                display: flex;
+                gap: 12px;
+                margin-top: 30px;
             }
 
             button {
-                background-color: #ffcc00;
-                color: #333;
+                flex: 1;
+                padding: 14px 24px;
                 border: none;
-                border-radius: 5px;
-                padding: 10px 15px;
+                border-radius: 8px;
                 font-size: 16px;
+                font-weight: 600;
                 cursor: pointer;
+                transition: all 0.2s;
+                font-family: inherit;
             }
 
-            button:hover {
-                background-color: #ffb300;
+            button.primary {
+                background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+                color: white;
+            }
+
+            button.primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+            }
+
+            button.primary:active {
+                transform: translateY(0);
+            }
+
+            button.primary:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            button.secondary {
+                background: #f3f4f6;
+                color: #374151;
+            }
+
+            button.secondary:hover {
+                background: #e5e7eb;
             }
 
             #status {
-                margin-top: 15px;
-                font-weight: bold;
+                margin-top: 20px;
+                padding: 16px;
+                border-radius: 8px;
+                font-weight: 500;
+                text-align: center;
+                display: none;
+                animation: slideIn 0.3s ease;
             }
 
-            a {
-                color: #0056b3;
+            #status.show {
+                display: block;
+            }
+
+            #status.success {
+                background: #d1fae5;
+                color: #065f46;
+                border: 2px solid #10b981;
+            }
+
+            #status.error {
+                background: #fee2e2;
+                color: #991b1b;
+                border: 2px solid #ef4444;
+            }
+
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .loading {
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-top-color: white;
+                border-radius: 50%;
+                animation: spin 0.6s linear infinite;
+            }
+
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+
+            .footer {
+                background: #f9fafb;
+                padding: 30px 40px;
+                border-top: 1px solid #e5e7eb;
+            }
+
+            .footer h3 {
+                color: #374151;
+                font-size: 16px;
+                font-weight: 600;
+                margin-bottom: 12px;
+            }
+
+            .footer p {
+                color: #6b7280;
+                font-size: 14px;
+                margin-bottom: 8px;
+            }
+
+            .footer a {
+                color: #2563eb;
                 text-decoration: none;
             }
 
-            a:hover {
+            .footer a:hover {
                 text-decoration: underline;
             }
         </style>
     </head>
 
     <body>
-        <h1>Extension options</h1>
-        <p>
-            This extension allows you to submit URLs for assessment using
-            <strong>urlscan.io</strong>. To use this feature, you need to register for an account and obtain an API key.
-        </p>
-        <ul>
-            <li>
-                To register an account, visit:
-                <a href="https://urlscan.io/user/signup" target="_blank">urlscan.io Signup</a>
-            </li>
-            <li>
-                To obtain an API key, visit:
-                <a href="https://urlscan.io/user/apikey/new/" target="_blank">urlscan.io API Key</a>
-            </li>
-        </ul>
-        <p>
-            Once you obtained your API key, please fill out the details below. Keep your API-key private and never share it, because the key
-            is personal and bound to your account. This extension only stores the API-key in localy, using Firefox storage database.
-        </p>
+        <div class="container">
+            <div class="header">
+                <h1>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    URLScan.io Extension Settings
+                </h1>
+                <p>Configure your security scanning preferences</p>
+            </div>
 
-        <h2>Enter Your urlscan.io API Key</h2>
-        <div>
-            <label for="apiKey">API Key:</label>
-            <input type="text" id="apiKey" placeholder="Enter your urlscan.io API Key" required />
-        </div>
-        <div>
-            <label for="visibility">Visibility:</label>
-            <select id="visibility" required>
-                <option value="public">Public</option>
-                <option value="unlisted" selected∏>Unlisted</option>
-                <option value="private">Private</option>
-            </select>
-        </div>
-        <button id="save">Save</button>
-        <p id="status"></p>
+            <div class="content">
+                <div class="info-box">
+                    <h2>🔒 About This Extension</h2>
+                    <p>
+                        This extension allows you to submit URLs for professional security assessment using
+                        <strong>urlscan.io</strong>. To use this feature, you need to register for an account and obtain an API key.
+                    </p>
+                    <ul>
+                        <li>
+                            📝 <strong>Register:</strong>
+                            <a href="https://urlscan.io/user/signup" target="_blank">Create Account</a>
+                        </li>
+                        <li>
+                            🔑 <strong>API Key:</strong>
+                            <a href="https://urlscan.io/user/profile/" target="_blank">Get Your API Key</a>
+                        </li>
+                    </ul>
+                    <p style="margin-top: 12px; font-size: 13px;">
+                        <strong>Privacy:</strong> Your API key is stored locally in Firefox's secure storage and is never shared with third parties.
+                    </p>
+                </div>
 
-        <!-- Link to external script -->
+                <form id="settingsForm">
+                    <div class="form-section">
+                        <h2>API Configuration</h2>
+
+                        <div class="form-group">
+                            <label for="apiKey">
+                                API Key
+                                <span class="label-description">Your personal urlscan.io API key</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input 
+                                    type="password" 
+                                    id="apiKey" 
+                                    placeholder="Enter your urlscan.io API Key" 
+                                    required 
+                                    autocomplete="off"
+                                    data-testid="api-key-input"
+                                />
+                                <button type="button" class="toggle-password" id="toggleApiKey" data-testid="toggle-api-key-btn">
+                                    Show
+                                </button>
+                            </div>
+                            <div class="error-message" id="apiKeyError">Please enter a valid API key (minimum 20 characters)</div>
+                            <div class="input-hint">Keep your API key private and never share it with anyone.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="visibility">
+                                Scan Visibility
+                                <span class="label-description">Control who can see your scans</span>
+                            </label>
+                            <select id="visibility" required data-testid="visibility-select">
+                                <option value="public">Public - Visible to everyone</option>
+                                <option value="unlisted" selected>Unlisted - Only via direct link</option>
+                                <option value="private">Private - Only you can see it</option>
+                            </select>
+                            <div class="input-hint">Recommended: Unlisted or Private for sensitive URLs</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tags">
+                                Custom Tags
+                                <span class="label-description">Organize your scans with tags (comma-separated)</span>
+                            </label>
+                            <textarea 
+                                id="tags" 
+                                placeholder="firefox, extension, security"
+                                data-testid="tags-input"
+                            ></textarea>
+                            <div class="input-hint">Example: firefox, extension, phishing-check</div>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="secondary" id="reset" data-testid="reset-btn">Reset to Defaults</button>
+                        <button type="submit" class="primary" id="save" data-testid="save-btn">Save Settings</button>
+                    </div>
+
+                    <div id="status"></div>
+                </form>
+            </div>
+
+            <div class="footer">
+                <h3>Credits & Information</h3>
+                <p><strong>Developed by:</strong> Paul Rutten (<a href="mailto:info@paulrutten.nl">info@paulrutten.nl</a>)</p>
+                <p>
+                    <strong>Powered by:</strong>
+                    <a href="https://urlscan.io/" target="_blank">urlscan.io</a> ©
+                    <span style="color: #9ca3af;">|</span>
+                    <a href="https://urlscan.io/docs/api/" target="_blank">API Documentation</a>
+                </p>
+                <p style="margin-top: 12px; font-size: 13px; color: #9ca3af;">
+                    Version 1.1.0 | For support and documentation, visit the extension homepage.
+                </p>
+            </div>
+        </div>
+
         <script src="options.js"></script>
-
-        <h2>Copyrights and Notices</h2>
-        <p>Build and maintained by: Paul Rutten (info@paulrutten.nl)</p>
-        <p>
-            This extension utilizes technology from
-            <a href="https://urlscan.io/impressum/" target="_blank">urlscan GmbH ©</a>
-            and
-            <a href="https://securitytrails.com/" target="_blank">Security Trails ©</a>.
-        </p>
-        <p>For more information, please refer to their respective documentation and terms of service.</p>
     </body>
 </html>
