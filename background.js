@@ -487,16 +487,53 @@ async function createContextMenus() {
             contexts: contexts
         });
 
-        // Add URLScan.io option
+        // Get queue count for URLScan menu
+        const queue = await getUrlScanQueue();
+        const pendingCount = queue.filter(item => item.status === 'pending').length;
+
+        // Add URLScan.io parent menu
         browser.contextMenus.create({
-            id: 'urlscan-submit',
+            id: 'urlscan-parent',
             parentId: 'security-parent',
-            title: 'Scan with URLScan.io',
+            title: 'URLScan.io',
             contexts: ['link'],
             icons: {
                 16: 'icons/urlscan_16.png'
             }
         });
+
+        // Add "Scan Now" option
+        browser.contextMenus.create({
+            id: 'urlscan-submit',
+            parentId: 'urlscan-parent',
+            title: '🔍 Scan Now',
+            contexts: ['link']
+        });
+
+        // Add "Add to Queue" option
+        browser.contextMenus.create({
+            id: 'urlscan-queue-add',
+            parentId: 'urlscan-parent',
+            title: '➕ Add to Scan Queue',
+            contexts: ['link']
+        });
+
+        // Add "Process Queue" option (if queue has items)
+        if (pendingCount > 0) {
+            browser.contextMenus.create({
+                id: 'urlscan-queue-separator',
+                parentId: 'urlscan-parent',
+                type: 'separator',
+                contexts: ['link']
+            });
+
+            browser.contextMenus.create({
+                id: 'urlscan-queue-process',
+                parentId: 'urlscan-parent',
+                title: `🚀 Process Queue (${pendingCount} URL${pendingCount !== 1 ? 's' : ''})`,
+                contexts: ['link']
+            });
+        }
 
         // Fetch NextDNS profiles
         nextDnsProfiles = await fetchNextDnsProfiles();
