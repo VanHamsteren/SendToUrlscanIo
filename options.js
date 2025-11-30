@@ -128,6 +128,60 @@ toggleNextDnsBtn.addEventListener('click', () => {
 });
 
 /**
+ * Test NextDNS connection
+ */
+testNextDnsBtn.addEventListener('click', async () => {
+    const apiKey = nextdnsApiKeyInput.value.trim();
+    
+    if (!apiKey) {
+        showStatus('⚠️ Please enter a NextDNS API key first', false);
+        return;
+    }
+    
+    // Show loading state
+    const originalText = testNextDnsBtn.textContent;
+    testNextDnsBtn.disabled = true;
+    testNextDnsBtn.innerHTML = '<span class="loading"></span> Testing...';
+    
+    try {
+        console.log('Testing NextDNS API connection...');
+        const response = await fetch('https://api.nextdns.io/profiles', {
+            headers: {
+                'X-Api-Key': apiKey
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            const profiles = data.data || [];
+            
+            if (profiles.length > 0) {
+                showStatus(`✓ Connection successful! Found ${profiles.length} profile(s): ${profiles.map(p => p.name || p.id).join(', ')}`, true);
+                console.log('NextDNS profiles:', profiles);
+                
+                // Display profiles
+                profilesList.innerHTML = profiles
+                    .map(p => `<li>• ${p.name || p.id} (${p.id})</li>`)
+                    .join('');
+                profilesInfo.classList.add('show');
+            } else {
+                showStatus('⚠️ Connection successful but no profiles found. Create a profile at nextdns.io', false);
+            }
+        } else {
+            const errorText = await response.text().catch(() => 'Unknown error');
+            showStatus(`✗ Connection failed (${response.status}): ${errorText}. Check your API key.`, false);
+            console.error('NextDNS API error:', response.status, errorText);
+        }
+    } catch (error) {
+        showStatus(`✗ Network error: ${error.message}. Check your internet connection.`, false);
+        console.error('NextDNS connection error:', error);
+    } finally {
+        testNextDnsBtn.disabled = false;
+        testNextDnsBtn.textContent = originalText;
+    }
+});
+
+/**
  * Handle form submission
  */
 form.addEventListener('submit', async (e) => {
