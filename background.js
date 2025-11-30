@@ -548,7 +548,7 @@ browser.contextMenus.onClicked.addListener(async (info) => {
         
         for (const profile of nextDnsProfiles) {
             try {
-                await addToNextDnsList(profile.id, profile.name || profile.id, domain, 'allowlist');
+                await addToNextDnsList(profile.id, profile.name || profile.id, domain, 'allowlist', true);
                 successCount++;
             } catch (error) {
                 console.error(`Failed to add to profile ${profile.id}:`, error);
