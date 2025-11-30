@@ -319,3 +319,118 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Log initialization
 console.log('Options page initialized');
+
+/**
+ * Load and display URLScan queue
+ */
+async function loadQueue() {
+    try {
+        const response = await browser.runtime.sendMessage({ action: 'getUrlScanQueue' });
+        
+        if (response.success) {
+            const queue = response.queue;
+            const pendingCount = queue.filter(item => item.status === 'pending').length;
+            
+            if (queue.length === 0) {
+                queueEmpty.style.display = 'block';
+                queueList.style.display = 'none';
+            } else {
+                queueEmpty.style.display = 'none';
+                queueList.style.display = 'block';
+                queueCount.textContent = pendingCount;
+                
+                // Render queue items
+                queueItems.innerHTML = queue.map(item => {
+                    const statusText = {
+                        pending: '⏳ Pending',
+                        scanning: '🔍 Scanning',
+                        completed: '✓ Completed',
+                        failed: '✗ Failed'
+                    }[item.status] || item.status;
+                    
+                    return `
+                        <div class="queue-item" data-url="${encodeURIComponent(item.url)}">
+                            <div class="queue-item-url">${escapeHtml(item.url)}</div>
+                            <div class="queue-item-status ${item.status}">${statusText}</div>
+                            <button class="queue-item-remove" data-url="${encodeURIComponent(item.url)}" title="Remove from queue">×</button>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Add event listeners to remove buttons
+                document.querySelectorAll('.queue-item-remove').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const url = decodeURIComponent(e.target.dataset.url);
+                        await browser.runtime.sendMessage({ 
+                            action: 'removeFromQueue', 
+                            url: url 
+                        });
+                        loadQueue();
+                    });
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Failed to load queue:', error);
+    }
+}
+
+/**
+ * Escape HTML to prevent XSS
+ */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
+ * Refresh queue display
+ */
+refreshQueueBtn.addEventListener('click', () => {
+    loadQueue();
+});
+
+/**
+ * Clear queue
+ */
+clearQueueBtn.addEventListener('click', async () => {
+    if (confirm('Are you sure you want to clear the entire scan queue?')) {
+        await browser.runtime.sendMessage({ action: 'clearQueue' });
+        loadQueue();
+        showStatus('Queue cleared', true);
+    }
+});
+
+/**
+ * Process queue
+ */
+processQueueBtn.addEventListener('click', async () => {
+    processQueueBtn.disabled = true;
+    processQueueBtn.textContent = '🚀 Processing...';
+    
+    await browser.runtime.sendMessage({ action: 'processQueue' });
+    
+    // Poll for updates
+    const pollInterval = setInterval(() => {
+        loadQueue();
+    }, 3000);
+    
+    // Stop polling after 2 minutes
+    setTimeout(() => {
+        clearInterval(pollInterval);
+        processQueueBtn.disabled = false;
+        processQueueBtn.textContent = '🚀 Process Queue';
+        loadQueue();
+    }, 120000);
+});
+
+// Load queue on page load
+loadQueue();
+
+// Refresh queue every 5 seconds if visible
+setInterval(() => {
+    if (document.visibilityState === 'visible') {
+        loadQueue();
+    }
+}, 5000);
