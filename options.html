@@ -391,6 +391,70 @@
                 background: #fef3c7;
                 color: #92400e;
             }
+
+            .queue-item {
+                background: white;
+                border: 1px solid #e5e7eb;
+                border-radius: 6px;
+                padding: 12px;
+                margin-bottom: 8px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .queue-item-url {
+                flex: 1;
+                font-size: 13px;
+                color: #374151;
+                word-break: break-all;
+                font-family: monospace;
+            }
+
+            .queue-item-status {
+                font-size: 12px;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-weight: 500;
+                white-space: nowrap;
+            }
+
+            .queue-item-status.pending {
+                background: #dbeafe;
+                color: #1e40af;
+            }
+
+            .queue-item-status.scanning {
+                background: #fef3c7;
+                color: #92400e;
+            }
+
+            .queue-item-status.completed {
+                background: #d1fae5;
+                color: #065f46;
+            }
+
+            .queue-item-status.failed {
+                background: #fee2e2;
+                color: #991b1b;
+            }
+
+            .queue-item-remove {
+                background: none;
+                border: none;
+                color: #ef4444;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 18px;
+                line-height: 1;
+                transition: background 0.2s;
+            }
+
+            .queue-item-remove:hover {
+                background: #fee2e2;
+            }
         </style>
     </head>
 
