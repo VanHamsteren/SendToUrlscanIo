@@ -871,6 +871,52 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         })();
         return true;
     }
+    
+    if (message.action === 'getUrlScanQueue') {
+        // Get URLScan queue
+        (async () => {
+            const queue = await getUrlScanQueue();
+            sendResponse({ success: true, queue: queue });
+        })();
+        return true;
+    }
+    
+    if (message.action === 'removeFromQueue') {
+        // Remove item from queue
+        (async () => {
+            const queue = await getUrlScanQueue();
+            const filtered = queue.filter(item => item.url !== message.url);
+            await saveUrlScanQueue(filtered);
+            await createContextMenus(); // Update menu count
+            sendResponse({ success: true });
+        })();
+        return true;
+    }
+    
+    if (message.action === 'clearQueue') {
+        // Clear queue
+        (async () => {
+            await clearUrlScanQueue();
+            sendResponse({ success: true });
+        })();
+        return true;
+    }
+    
+    if (message.action === 'processQueue') {
+        // Process queue
+        (async () => {
+            processUrlScanQueue();
+            sendResponse({ success: true });
+        })();
+        return true;
+    }
+    
+    if (message.action === 'cancelQueueProcessing') {
+        // Cancel queue processing
+        queueProcessCancelled = true;
+        sendResponse({ success: true });
+        return true;
+    }
 });
 
 // ---- Extension Initialization ----
