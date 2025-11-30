@@ -181,26 +181,29 @@ async function addToNextDnsList(profileId, profileName, domain, listType) {
             return;
         }
 
-        // NextDNS API endpoint - note: uses 'privacy' path
-        const endpoint = `https://api.nextdns.io/profiles/${profileId}/privacy/${listType}/${domain}`;
+        // NextDNS API endpoint - POST to add domain to list
+        const endpoint = `https://api.nextdns.io/profiles/${profileId}/${listType}`;
         
-        console.log(`Calling NextDNS API: PUT ${endpoint}`);
+        console.log(`Calling NextDNS API: POST ${endpoint} with domain: ${domain}`);
         
         const response = await fetch(endpoint, {
-            method: 'PUT',
+            method: 'POST',
             headers: {
                 'X-Api-Key': apiKey,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ active: true })
+            body: JSON.stringify({
+                id: domain,
+                active: true
+            })
         });
 
         console.log(`NextDNS API response: ${response.status}`);
 
-        if (response.ok || response.status === 204) {
+        if (response.ok || response.status === 201 || response.status === 204) {
             const listName = listType === 'denylist' ? 'blocklist' : 'allowlist';
             notifySuccess(`NextDNS: Added "${domain}" to ${listName} in profile "${profileName}"`);
-            console.log(`NextDNS: Added ${domain} to ${listType} in profile ${profileId}`);
+            console.log(`NextDNS: Successfully added ${domain} to ${listType} in profile ${profileId}`);
         } else {
             const errorText = await response.text().catch(() => 'Unknown error');
             notifyError(
