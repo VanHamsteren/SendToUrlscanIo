@@ -369,6 +369,30 @@ async function createContextMenus() {
 
             // Add profile options for blocklist
             console.log('Creating blocklist profile menus...');
+            
+            // Add "All Profiles" option first
+            if (nextDnsProfiles.length > 1) {
+                try {
+                    browser.contextMenus.create({
+                        id: 'nextdns-blocklist-all',
+                        parentId: 'nextdns-blocklist',
+                        title: '📋 All Profiles',
+                        contexts: contexts
+                    });
+                    console.log('  ✓ Created "All Profiles" option for blocklist');
+                    
+                    // Add separator
+                    browser.contextMenus.create({
+                        id: 'nextdns-blocklist-separator',
+                        parentId: 'nextdns-blocklist',
+                        type: 'separator',
+                        contexts: contexts
+                    });
+                } catch (err) {
+                    console.error('  ✗ Failed to create "All Profiles" menu:', err);
+                }
+            }
+            
             for (const profile of nextDnsProfiles) {
                 try {
                     browser.contextMenus.create({
@@ -385,6 +409,30 @@ async function createContextMenus() {
 
             // Add profile options for allowlist
             console.log('Creating allowlist profile menus...');
+            
+            // Add "All Profiles" option first
+            if (nextDnsProfiles.length > 1) {
+                try {
+                    browser.contextMenus.create({
+                        id: 'nextdns-allowlist-all',
+                        parentId: 'nextdns-allowlist',
+                        title: '📋 All Profiles',
+                        contexts: contexts
+                    });
+                    console.log('  ✓ Created "All Profiles" option for allowlist');
+                    
+                    // Add separator
+                    browser.contextMenus.create({
+                        id: 'nextdns-allowlist-separator',
+                        parentId: 'nextdns-allowlist',
+                        type: 'separator',
+                        contexts: contexts
+                    });
+                } catch (err) {
+                    console.error('  ✗ Failed to create "All Profiles" menu:', err);
+                }
+            }
+            
             for (const profile of nextDnsProfiles) {
                 try {
                     browser.contextMenus.create({
