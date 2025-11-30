@@ -430,6 +430,59 @@ browser.action.onClicked.addListener(() => {
     browser.runtime.openOptionsPage();
 });
 
+// ---- Message Handling for Options Page ----
+// Handle messages from options page (for testing API connection)
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'testNextDnsConnection') {
+        // Test NextDNS API connection
+        (async () => {
+            try {
+                const apiKey = message.apiKey;
+                if (!apiKey) {
+                    sendResponse({ success: false, error: 'No API key provided' });
+                    return;
+                }
+
+                const response = await fetch('https://api.nextdns.io/profiles', {
+                    headers: { 'X-Api-Key': apiKey }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const profiles = data.data || [];
+                    sendResponse({ 
+                        success: true, 
+                        profiles: profiles,
+                        count: profiles.length 
+                    });
+                } else {
+                    const errorText = await response.text().catch(() => 'Unknown error');
+                    sendResponse({ 
+                        success: false, 
+                        error: `HTTP ${response.status}: ${errorText}`,
+                        status: response.status
+                    });
+                }
+            } catch (error) {
+                sendResponse({ 
+                    success: false, 
+                    error: error.message 
+                });
+            }
+        })();
+        return true; // Keep message channel open for async response
+    }
+    
+    if (message.action === 'fetchProfiles') {
+        // Fetch profiles and rebuild menus
+        (async () => {
+            await createContextMenus();
+            sendResponse({ success: true });
+        })();
+        return true;
+    }
+});
+
 // ---- Extension Initialization ----
 // Create context menus on extension load
 createContextMenus();
