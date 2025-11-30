@@ -527,6 +527,54 @@
                     <!-- Future Integrations Section -->
                     <div class="form-section">
                         <h2>
+                            🚀 URLScan.io Scan Queue
+                        </h2>
+                        <p class="section-description">
+                            Queue URLs for batch scanning. Add URLs throughout the day and process them all at once.
+                        </p>
+
+                        <div id="queueSection">
+                            <div id="queueEmpty" class="info-box" style="background: #f9fafb; border-left-color: #9ca3af; display: none;">
+                                <p style="color: #6b7280;">No URLs in scan queue. Right-click any link and select "Add to Scan Queue" to get started.</p>
+                            </div>
+
+                            <div id="queueList" style="display: none;">
+                                <div style="background: #f3f4f6; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                        <h3 style="margin: 0; font-size: 16px; color: #374151;">
+                                            <span id="queueCount">0</span> URL(s) in Queue
+                                        </h3>
+                                        <div style="display: flex; gap: 8px;">
+                                            <button type="button" id="refreshQueue" class="secondary" style="padding: 6px 12px; font-size: 14px; flex: none;">
+                                                🔄 Refresh
+                                            </button>
+                                            <button type="button" id="clearQueue" class="secondary" style="padding: 6px 12px; font-size: 14px; flex: none; background: #fef2f2; color: #991b1b;">
+                                                🗑️ Clear All
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="queueItems" style="max-height: 400px; overflow-y: auto;">
+                                        <!-- Queue items will be inserted here -->
+                                    </div>
+                                </div>
+
+                                <div class="button-group">
+                                    <button type="button" id="processQueue" class="primary" data-testid="process-queue-btn">
+                                        🚀 Process Queue
+                                    </button>
+                                </div>
+
+                                <div class="input-hint" style="margin-top: 12px;">
+                                    <strong>Rate Limiting:</strong> URLs are scanned with 2.5 second delays to respect URLScan.io rate limits.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Future Integrations Section -->
+                    <div class="form-section">
+                        <h2>
                             🚀 Future Security Tools
                             <span class="badge coming-soon">Coming Soon</span>
                         </h2>
