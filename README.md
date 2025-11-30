@@ -1,0 +1,159 @@
+# URLScan.io Firefox Extension
+
+A professional Firefox extension that allows users to quickly submit URLs for security analysis using urlscan.io's powerful scanning service.
+
+## Features
+
+- 🔒 **Right-Click Security Scanning**: Context menu integration for quick URL scanning
+- ⚙️ **Customizable Settings**: Configure API key, scan visibility, and custom tags
+- 🎨 **Professional UI**: Modern, clean interface matching urlscan.io branding
+- 🔐 **Secure Storage**: API keys stored locally in Firefox's secure storage
+- 📊 **Automatic Results**: Opens scan results automatically when ready
+- 🏷️ **Custom Tagging**: Organize your scans with custom tags
+
+## Installation
+
+### For Users
+1. Download the latest release
+2. Open Firefox and navigate to `about:addons`
+3. Click the gear icon and select "Install Add-on From File"
+4. Select the downloaded `.xpi` file
+
+### For Developers
+1. Clone this repository
+2. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`
+3. Click "Load Temporary Add-on"
+4. Select any file in the extension directory
+
+## Setup
+
+1. **Get an API Key**: 
+   - Register at [urlscan.io](https://urlscan.io/user/signup)
+   - Generate your API key from your [profile page](https://urlscan.io/user/profile/)
+
+2. **Configure Extension**:
+   - Click the extension icon or access settings from the extensions menu
+   - Enter your API key
+   - Choose scan visibility (Public/Unlisted/Private)
+   - Optionally customize tags (default: `firefox, extension`)
+
+3. **Start Scanning**:
+   - Right-click any link on a webpage
+   - Select "Scan with urlscan.io"
+   - Wait for the scan to complete (results open automatically)
+
+## Technical Details
+
+### Manifest Version
+- **Version**: 3 (Manifest V3)
+- **Minimum Firefox**: 109.0+
+
+### Permissions
+- `contextMenus`: For right-click menu integration
+- `activeTab`: To access the current tab's context
+- `tabs`: To open scan results in new tabs
+- `storage`: To securely store user settings
+- `notifications`: To display scan status updates
+- `https://urlscan.io/*`: To communicate with urlscan.io API
+
+### File Structure
+```
+/app/
+├── manifest.json          # Extension manifest (Manifest V3)
+├── background.js          # Background service worker
+├── options.html           # Settings page
+├── options.js             # Settings logic
+├── icons/                 # Extension icons
+│   ├── urlscan_16.png
+│   ├── urlscan_32.png
+│   └── urlscan_256.png
+└── README.md             # This file
+```
+
+## API Integration
+
+This extension integrates with the [urlscan.io API v1](https://urlscan.io/docs/api/):
+
+- **Scan Submission**: `POST https://urlscan.io/api/v1/scan/`
+- **Result Polling**: `GET https://urlscan.io/api/v1/result/{uuid}/`
+
+### Scan Flow
+1. User right-clicks a link and selects "Scan with urlscan.io"
+2. Extension submits the URL to urlscan.io API
+3. Initial 10-second delay (scans typically take 10-15 seconds)
+4. Polls every 2 seconds for up to 40 seconds
+5. Opens results page automatically when ready
+
+## Privacy & Security
+
+- **Local Storage Only**: API keys are stored exclusively in Firefox's secure local storage
+- **No Third-Party Sharing**: Your API key is never transmitted to any service except urlscan.io
+- **User Control**: You control scan visibility (public/unlisted/private)
+- **Open Source**: All code is available for inspection
+
+## Development
+
+### Code Quality
+- ✅ ESLint validated
+- ✅ Modern ES6+ JavaScript
+- ✅ Comprehensive error handling
+- ✅ JSDoc documentation
+- ✅ Input validation
+
+### Testing
+To test the extension:
+1. Load it temporarily in Firefox (`about:debugging`)
+2. Configure your API key in the options page
+3. Right-click any link and test the scanning functionality
+4. Verify notifications appear correctly
+5. Confirm results page opens automatically
+
+## Changelog
+
+### Version 1.1.0 (Current)
+- ✨ Upgraded to Manifest V3
+- ✨ Added customizable tags feature (defaults: firefox, extension)
+- 🐛 Fixed polling delay bug
+- 🎨 Complete UI redesign with urlscan.io branding
+- 🔐 Added API key show/hide toggle
+- ✅ Added comprehensive input validation
+- 📝 Improved error messages and user feedback
+- 🏗️ Better code structure with JSDoc comments
+- ♿ Added accessibility improvements
+
+### Version 1.0.0
+- Initial release
+- Basic URL scanning functionality
+- Context menu integration
+- Settings page
+
+## Credits
+
+**Developer**: Paul Rutten (info@paulrutten.nl)
+
+**Powered by**: 
+- [urlscan.io](https://urlscan.io/) - Website security scanner
+- [urlscan.io API](https://urlscan.io/docs/api/) - Public API
+
+## License
+
+This extension is provided as-is for use with urlscan.io's services. Please refer to urlscan.io's terms of service for API usage guidelines.
+
+## Support
+
+For issues or questions:
+- Email: info@paulrutten.nl
+- Check [urlscan.io documentation](https://urlscan.io/docs/api/)
+
+## Mozilla Add-ons Submission Checklist
+
+- ✅ Manifest V3 compliant
+- ✅ Clear privacy policy (API keys stored locally)
+- ✅ All permissions justified and documented
+- ✅ No obfuscated code
+- ✅ Comprehensive error handling
+- ✅ User-friendly interface
+- ✅ Professional design
+- ✅ Proper versioning
+- ✅ Complete documentation
+- ✅ Tested on Firefox 109+
