@@ -14,8 +14,9 @@ let queueProcessCancelled = false;
 /**
  * Submit a URL to urlscan.io for scanning
  * @param {string} url - The URL to scan
+ * @param {boolean} fromQueue - Whether this scan is from queue processing
  */
-async function sendToUrlscan(url) {
+async function sendToUrlscan(url, fromQueue = false) {
     const API_ENDPOINT = 'https://urlscan.io/api/v1/scan/';
     
     try {
