@@ -503,7 +503,57 @@ browser.contextMenus.onClicked.addListener(async (info) => {
         console.log('Scanning URL:', target);
         sendToUrlscan(target);
     }
-    // NextDNS blocklist
+    // NextDNS - Add to ALL profiles (blocklist)
+    else if (menuItemId === 'nextdns-blocklist-all') {
+        const domain = extractDomain(target);
+        console.log(`Adding ${domain} to blocklist for ALL profiles`);
+        let successCount = 0;
+        let failCount = 0;
+        
+        for (const profile of nextDnsProfiles) {
+            try {
+                await addToNextDnsList(profile.id, profile.name || profile.id, domain, 'denylist');
+                successCount++;
+            } catch (error) {
+                console.error(`Failed to add to profile ${profile.id}:`, error);
+                failCount++;
+            }
+        }
+        
+        if (successCount === nextDnsProfiles.length) {
+            notifySuccess(`NextDNS: Added "${domain}" to blocklist in all ${successCount} profiles`);
+        } else if (successCount > 0) {
+            notifySuccess(`NextDNS: Added "${domain}" to ${successCount} profiles (${failCount} failed)`);
+        } else {
+            notifyError('NextDNS Error', `Failed to add "${domain}" to any profiles`);
+        }
+    }
+    // NextDNS - Add to ALL profiles (allowlist)
+    else if (menuItemId === 'nextdns-allowlist-all') {
+        const domain = extractDomain(target);
+        console.log(`Adding ${domain} to allowlist for ALL profiles`);
+        let successCount = 0;
+        let failCount = 0;
+        
+        for (const profile of nextDnsProfiles) {
+            try {
+                await addToNextDnsList(profile.id, profile.name || profile.id, domain, 'allowlist');
+                successCount++;
+            } catch (error) {
+                console.error(`Failed to add to profile ${profile.id}:`, error);
+                failCount++;
+            }
+        }
+        
+        if (successCount === nextDnsProfiles.length) {
+            notifySuccess(`NextDNS: Added "${domain}" to allowlist in all ${successCount} profiles`);
+        } else if (successCount > 0) {
+            notifySuccess(`NextDNS: Added "${domain}" to ${successCount} profiles (${failCount} failed)`);
+        } else {
+            notifyError('NextDNS Error', `Failed to add "${domain}" to any profiles`);
+        }
+    }
+    // NextDNS blocklist (single profile)
     else if (menuItemId.startsWith('nextdns-blocklist-')) {
         const profileId = menuItemId.replace('nextdns-blocklist-', '');
         const profile = nextDnsProfiles.find(p => p.id === profileId);
@@ -511,7 +561,7 @@ browser.contextMenus.onClicked.addListener(async (info) => {
         console.log(`Adding ${domain} to blocklist for profile ${profileId}`);
         addToNextDnsList(profileId, profile?.name || profileId, domain, 'denylist');
     }
-    // NextDNS allowlist
+    // NextDNS allowlist (single profile)
     else if (menuItemId.startsWith('nextdns-allowlist-')) {
         const profileId = menuItemId.replace('nextdns-allowlist-', '');
         const profile = nextDnsProfiles.find(p => p.id === profileId);
