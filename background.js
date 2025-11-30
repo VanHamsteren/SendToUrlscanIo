@@ -151,15 +151,38 @@ function pollForScanResult(uuid, apiKey) {
 }
 
 /**
- * Extract domain from URL
- * @param {string} url - Full URL
+ * Extract domain from URL or text
+ * Handles special cases like URLScan.io result pages
+ * @param {string} url - Full URL or text
  * @returns {string} Domain only
  */
 function extractDomain(url) {
     try {
-        const urlObj = new URL(url);
+        // Check if this is a URLScan.io result page
+        // Format: urlscan.io/domain/example.com or urlscan.io/result/UUID
+        if (url.includes('urlscan.io/domain/')) {
+            const match = url.match(/urlscan\.io\/domain\/([^\/\?#]+)/);
+            if (match && match[1]) {
+                console.log(`Extracted domain from URLScan: ${match[1]}`);
+                return match[1];
+            }
+        }
+        
+        // If it's just a domain without protocol, return as-is
+        if (!url.includes('://') && !url.includes('/')) {
+            return url;
+        }
+        
+        // Try to parse as URL
+        const urlObj = new URL(url.includes('://') ? url : `https://${url}`);
         return urlObj.hostname;
     } catch (error) {
+        // If URL parsing fails, try to extract domain-like pattern
+        const domainMatch = url.match(/([a-z0-9-]+\.)+[a-z]{2,}/i);
+        if (domainMatch) {
+            console.log(`Extracted domain via regex: ${domainMatch[0]}`);
+            return domainMatch[0];
+        }
         console.error('Failed to extract domain:', error);
         return url;
     }
