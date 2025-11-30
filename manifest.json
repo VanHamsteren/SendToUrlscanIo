@@ -13,7 +13,8 @@
         "notifications"
     ],
     "host_permissions": [
-        "https://urlscan.io/*"
+        "https://urlscan.io/*",
+        "https://api.nextdns.io/*"
     ],
     "icons": {
         "16": "icons/urlscan_16.png",
