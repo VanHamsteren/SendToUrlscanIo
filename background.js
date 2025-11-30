@@ -1,8 +1,11 @@
 /* global browser */
 /**
- * URLScan.io Firefox Extension - Background Service Worker
- * Handles URL scanning submissions and result polling
+ * URLScan.io & NextDNS Firefox Extension - Background Service Worker
+ * Handles security tool integrations and context menu management
  */
+
+// Store profiles for menu creation
+let nextDnsProfiles = [];
 
 /**
  * Submit a URL to urlscan.io for scanning
@@ -18,13 +21,13 @@ async function sendToUrlscan(url) {
 
         // Validate configuration
         if (!apiKey || !visibility) {
-            notifyError('Missing Configuration', 'Please set your API key and visibility in the extension options.');
+            notifyError('URLScan Configuration Missing', 'Please set your API key and visibility in the extension options.');
             return;
         }
 
         // Validate API key format (basic check)
         if (apiKey.length < 20) {
-            notifyError('Invalid API Key', 'The API key appears to be invalid. Please check your settings.');
+            notifyError('Invalid URLScan API Key', 'The API key appears to be invalid. Please check your settings.');
             return;
         }
 
@@ -57,7 +60,7 @@ async function sendToUrlscan(url) {
             const errorData = await response.json().catch(() => ({}));
             const errorMessage = errorData.message || errorData.description || 'Unknown error from urlscan.io';
             notifyError(
-                `API Error (${response.status})`,
+                `URLScan API Error (${response.status})`,
                 errorMessage
             );
             console.error('URLScan API Error:', errorData);
@@ -65,7 +68,7 @@ async function sendToUrlscan(url) {
         }
 
         const data = await response.json();
-        notifySuccess('Scan submitted successfully! Opening results soon...');
+        notifySuccess('URLScan submitted successfully! Opening results soon...');
         
         // Start polling for results
         if (data.uuid) {
@@ -75,8 +78,8 @@ async function sendToUrlscan(url) {
         }
 
     } catch (error) {
-        console.error('Unexpected error:', error);
-        notifyError('Unexpected Error', error.message || 'An unexpected error occurred. Please try again.');
+        console.error('URLScan unexpected error:', error);
+        notifyError('URLScan Error', error.message || 'An unexpected error occurred. Please try again.');
     }
 }
 
@@ -112,15 +115,15 @@ function pollForScanResult(uuid, apiKey) {
                     url: `https://urlscan.io/result/${uuid}/`,
                     active: true
                 });
-                console.log(`Scan completed successfully: ${uuid}`);
+                console.log(`URLScan completed successfully: ${uuid}`);
             } else if (response.status === 404) {
                 // Scan not ready yet
-                console.log(`Scan not ready yet (attempt ${attempts}/${MAX_ATTEMPTS})...`);
+                console.log(`URLScan not ready yet (attempt ${attempts}/${MAX_ATTEMPTS})...`);
                 
                 if (attempts >= MAX_ATTEMPTS) {
                     clearInterval(intervalId);
                     notifyError(
-                        'Scan Timeout', 
+                        'URLScan Timeout', 
                         'The scan is taking longer than expected. You can check results manually at urlscan.io.'
                     );
                 }
@@ -129,15 +132,15 @@ function pollForScanResult(uuid, apiKey) {
                 clearInterval(intervalId);
                 const errorText = await response.text().catch(() => 'Unknown error');
                 notifyError(
-                    `Polling Error (${response.status})`, 
+                    `URLScan Polling Error (${response.status})`, 
                     errorText
                 );
-                console.error('Polling error:', response.status, errorText);
+                console.error('URLScan polling error:', response.status, errorText);
             }
         } catch (error) {
             clearInterval(intervalId);
-            console.error('Polling exception:', error);
-            notifyError('Network Error', 'Failed to check scan results. Please check your connection.');
+            console.error('URLScan polling exception:', error);
+            notifyError('Network Error', 'Failed to check URLScan results. Please check your connection.');
         }
     };
 
@@ -146,6 +149,231 @@ function pollForScanResult(uuid, apiKey) {
         intervalId = setInterval(checkResults, POLL_INTERVAL);
     }, INITIAL_DELAY);
 }
+
+/**
+ * Extract domain from URL
+ * @param {string} url - Full URL
+ * @returns {string} Domain only
+ */
+function extractDomain(url) {
+    try {
+        const urlObj = new URL(url);
+        return urlObj.hostname;
+    } catch (error) {
+        console.error('Failed to extract domain:', error);
+        return url;
+    }
+}
+
+/**
+ * Add domain to NextDNS list (blocklist or allowlist)
+ * @param {string} profileId - NextDNS profile ID
+ * @param {string} profileName - Profile name for display
+ * @param {string} domain - Domain to add
+ * @param {string} listType - 'denylist' or 'allowlist'
+ */
+async function addToNextDnsList(profileId, profileName, domain, listType) {
+    try {
+        const { nextdnsApiKey: apiKey } = await browser.storage.sync.get(['nextdnsApiKey']);
+
+        if (!apiKey) {
+            notifyError('NextDNS Configuration Missing', 'Please set your NextDNS API key in the extension options.');
+            return;
+        }
+
+        const endpoint = `https://api.nextdns.io/profiles/${profileId}/${listType}/${domain}`;
+        
+        const response = await fetch(endpoint, {
+            method: 'PUT',
+            headers: {
+                'X-Api-Key': apiKey,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ active: true })
+        });
+
+        if (response.ok || response.status === 204) {
+            const listName = listType === 'denylist' ? 'blocklist' : 'allowlist';
+            notifySuccess(`NextDNS: Added "${domain}" to ${listName} in profile "${profileName}"`);
+            console.log(`NextDNS: Added ${domain} to ${listType} in profile ${profileId}`);
+        } else {
+            const errorText = await response.text().catch(() => 'Unknown error');
+            notifyError(
+                `NextDNS API Error (${response.status})`,
+                errorText || 'Failed to add domain to list'
+            );
+            console.error('NextDNS API Error:', response.status, errorText);
+        }
+
+    } catch (error) {
+        console.error('NextDNS unexpected error:', error);
+        notifyError('NextDNS Error', error.message || 'An unexpected error occurred.');
+    }
+}
+
+/**
+ * Fetch NextDNS profiles for the user
+ * @returns {Array} Array of profile objects
+ */
+async function fetchNextDnsProfiles() {
+    try {
+        const { nextdnsApiKey: apiKey } = await browser.storage.sync.get(['nextdnsApiKey']);
+
+        if (!apiKey) {
+            console.log('NextDNS API key not configured');
+            return [];
+        }
+
+        const response = await fetch('https://api.nextdns.io/profiles', {
+            headers: {
+                'X-Api-Key': apiKey
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('NextDNS profiles fetched:', data.data?.length || 0);
+            return data.data || [];
+        } else {
+            console.error('Failed to fetch NextDNS profiles:', response.status);
+            return [];
+        }
+
+    } catch (error) {
+        console.error('Error fetching NextDNS profiles:', error);
+        return [];
+    }
+}
+
+/**
+ * Create context menus based on available integrations
+ */
+async function createContextMenus() {
+    // Remove all existing menus
+    await browser.contextMenus.removeAll();
+
+    // Create parent "Security" menu
+    browser.contextMenus.create({
+        id: 'security-parent',
+        title: 'Security Analysis',
+        contexts: ['link']
+    });
+
+    // Add URLScan.io option
+    browser.contextMenus.create({
+        id: 'urlscan-submit',
+        parentId: 'security-parent',
+        title: 'Scan with URLScan.io',
+        contexts: ['link'],
+        icons: {
+            16: 'icons/urlscan_16.png'
+        }
+    });
+
+    // Fetch NextDNS profiles
+    nextDnsProfiles = await fetchNextDnsProfiles();
+
+    if (nextDnsProfiles.length > 0) {
+        // Create NextDNS parent menu
+        browser.contextMenus.create({
+            id: 'nextdns-parent',
+            parentId: 'security-parent',
+            title: 'NextDNS',
+            contexts: ['link']
+        });
+
+        // Create "Add to blocklist" submenu
+        browser.contextMenus.create({
+            id: 'nextdns-blocklist',
+            parentId: 'nextdns-parent',
+            title: '🚫 Add to Blocklist',
+            contexts: ['link']
+        });
+
+        // Create "Add to allowlist" submenu
+        browser.contextMenus.create({
+            id: 'nextdns-allowlist',
+            parentId: 'nextdns-parent',
+            title: '✓ Add to Allowlist',
+            contexts: ['link']
+        });
+
+        // Add profile options for blocklist
+        nextDnsProfiles.forEach((profile) => {
+            browser.contextMenus.create({
+                id: `nextdns-blocklist-${profile.id}`,
+                parentId: 'nextdns-blocklist',
+                title: profile.name || profile.id,
+                contexts: ['link']
+            });
+        });
+
+        // Add profile options for allowlist
+        nextDnsProfiles.forEach((profile) => {
+            browser.contextMenus.create({
+                id: `nextdns-allowlist-${profile.id}`,
+                parentId: 'nextdns-allowlist',
+                title: profile.name || profile.id,
+                contexts: ['link']
+            });
+        });
+
+        console.log(`Created NextDNS menus for ${nextDnsProfiles.length} profiles`);
+    }
+
+    // Add separator and future tools hint
+    browser.contextMenus.create({
+        id: 'separator',
+        parentId: 'security-parent',
+        type: 'separator',
+        contexts: ['link']
+    });
+
+    browser.contextMenus.create({
+        id: 'more-tools',
+        parentId: 'security-parent',
+        title: '⚙️ Configure Tools',
+        contexts: ['link']
+    });
+
+    console.log('Context menus created successfully');
+}
+
+/**
+ * Handle context menu clicks
+ */
+browser.contextMenus.onClicked.addListener(async (info) => {
+    const menuItemId = info.menuItemId;
+    const linkUrl = info.linkUrl;
+
+    if (!linkUrl) return;
+
+    // URLScan.io
+    if (menuItemId === 'urlscan-submit') {
+        console.log('Scanning URL:', linkUrl);
+        sendToUrlscan(linkUrl);
+    }
+    // NextDNS blocklist
+    else if (menuItemId.startsWith('nextdns-blocklist-')) {
+        const profileId = menuItemId.replace('nextdns-blocklist-', '');
+        const profile = nextDnsProfiles.find(p => p.id === profileId);
+        const domain = extractDomain(linkUrl);
+        console.log(`Adding ${domain} to blocklist for profile ${profileId}`);
+        addToNextDnsList(profileId, profile?.name || profileId, domain, 'denylist');
+    }
+    // NextDNS allowlist
+    else if (menuItemId.startsWith('nextdns-allowlist-')) {
+        const profileId = menuItemId.replace('nextdns-allowlist-', '');
+        const profile = nextDnsProfiles.find(p => p.id === profileId);
+        const domain = extractDomain(linkUrl);
+        console.log(`Adding ${domain} to allowlist for profile ${profileId}`);
+        addToNextDnsList(profileId, profile?.name || profileId, domain, 'allowlist');
+    }
+    // Configure tools
+    else if (menuItemId === 'more-tools') {
+        browser.runtime.openOptionsPage();
+    }
+});
 
 /**
  * Display a browser notification to the user
@@ -179,28 +407,22 @@ function notifyError(title, message) {
     notifyUser(`✗ ${title}`, message);
 }
 
-// ---- Context Menu Setup ----
-browser.contextMenus.create({
-    id: 'sendToUrlscan',
-    title: 'Scan with urlscan.io',
-    contexts: ['link'],
-    icons: {
-        16: 'icons/urlscan_16.png',
-        32: 'icons/urlscan_32.png'
-    }
-});
-
-browser.contextMenus.onClicked.addListener((info) => {
-    if (info.menuItemId === 'sendToUrlscan' && info.linkUrl) {
-        console.log('Scanning URL:', info.linkUrl);
-        sendToUrlscan(info.linkUrl);
-    }
-});
-
 // ---- Toolbar Button Action ----
 // Open options page when toolbar icon is clicked
 browser.action.onClicked.addListener(() => {
     browser.runtime.openOptionsPage();
 });
 
-console.log('URLScan.io extension loaded successfully');
+// ---- Extension Initialization ----
+// Create context menus on extension load
+createContextMenus();
+
+// Listen for storage changes to update menus
+browser.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === 'sync' && changes.nextdnsApiKey) {
+        console.log('NextDNS API key changed, recreating menus...');
+        createContextMenus();
+    }
+});
+
+console.log('Security Analysis extension loaded successfully');
