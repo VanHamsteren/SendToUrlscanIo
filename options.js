@@ -27,6 +27,16 @@ const nextdnsKeyError = document.getElementById('nextdnsKeyError');
 const profilesInfo = document.getElementById('profilesInfo');
 const profilesList = document.getElementById('profilesList');
 
+// Queue management elements
+const queueSection = document.getElementById('queueSection');
+const queueEmpty = document.getElementById('queueEmpty');
+const queueList = document.getElementById('queueList');
+const queueCount = document.getElementById('queueCount');
+const queueItems = document.getElementById('queueItems');
+const refreshQueueBtn = document.getElementById('refreshQueue');
+const clearQueueBtn = document.getElementById('clearQueue');
+const processQueueBtn = document.getElementById('processQueue');
+
 /**
  * Validate API key format
  * @param {string} apiKey - The API key to validate
