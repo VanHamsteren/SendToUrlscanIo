@@ -132,10 +132,15 @@ toggleNextDnsBtn.addEventListener('click', () => {
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    // Trim all inputs to remove whitespace
     const apiKey = apiKeyInput.value.trim();
     const visibility = visibilitySelect.value;
     const tags = tagsInput.value.trim();
     const nextdnsApiKey = nextdnsApiKeyInput.value.trim();
+
+    // Update input fields with trimmed values
+    apiKeyInput.value = apiKey;
+    nextdnsApiKeyInput.value = nextdnsApiKey;
 
     // Validate URLScan API key if provided
     if (apiKey && !validateApiKey(apiKey)) {
@@ -161,12 +166,14 @@ form.addEventListener('submit', async (e) => {
             nextdnsApiKey: nextdnsApiKey
         });
         
-        showStatus('✓ All settings saved successfully!', true);
+        showStatus('✓ All settings saved successfully! Context menu will update shortly.', true);
         console.log('Settings saved:', { visibility, tags: tags || DEFAULTS.tags, hasNextDns: !!nextdnsApiKey });
         
         // Fetch profiles if NextDNS key is set
         if (nextdnsApiKey) {
             await fetchAndDisplayProfiles();
+        } else {
+            profilesInfo.classList.remove('show');
         }
     } catch (error) {
         console.error('Storage Error:', error);
