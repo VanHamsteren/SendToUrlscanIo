@@ -325,6 +325,150 @@ async function fetchNextDnsProfiles() {
 }
 
 /**
+ * Get URLScan queue from storage
+ * @returns {Array} Queue items
+ */
+async function getUrlScanQueue() {
+    try {
+        const { urlscanQueue = [] } = await browser.storage.local.get(['urlscanQueue']);
+        return urlscanQueue;
+    } catch (error) {
+        console.error('Failed to get URLScan queue:', error);
+        return [];
+    }
+}
+
+/**
+ * Save URLScan queue to storage
+ * @param {Array} queue - Queue items
+ */
+async function saveUrlScanQueue(queue) {
+    try {
+        await browser.storage.local.set({ urlscanQueue: queue });
+    } catch (error) {
+        console.error('Failed to save URLScan queue:', error);
+    }
+}
+
+/**
+ * Add URL to URLScan queue
+ * @param {string} url - URL to add
+ */
+async function addToUrlScanQueue(url) {
+    try {
+        const queue = await getUrlScanQueue();
+        
+        // Check for duplicates
+        if (queue.some(item => item.url === url)) {
+            notifyUser('⚠️ Already in Queue', `"${url}" is already queued for scanning`);
+            console.log('URL already in queue:', url);
+            return;
+        }
+        
+        // Add to queue
+        queue.push({
+            url: url,
+            addedAt: new Date().toISOString(),
+            status: 'pending', // pending, scanning, completed, failed
+            uuid: null,
+            error: null
+        });
+        
+        await saveUrlScanQueue(queue);
+        notifySuccess(`Added to scan queue (${queue.length} URLs)`);
+        console.log('Added to URLScan queue:', url);
+        
+        // Update context menus to show new count
+        await createContextMenus();
+    } catch (error) {
+        console.error('Failed to add to queue:', error);
+        notifyError('Queue Error', 'Failed to add URL to scan queue');
+    }
+}
+
+/**
+ * Process URLScan queue
+ */
+async function processUrlScanQueue() {
+    if (isProcessingQueue) {
+        notifyUser('⚠️ Already Processing', 'Queue is already being processed');
+        return;
+    }
+    
+    const queue = await getUrlScanQueue();
+    const pendingItems = queue.filter(item => item.status === 'pending');
+    
+    if (pendingItems.length === 0) {
+        notifyUser('ℹ️ Queue Empty', 'No URLs pending in scan queue');
+        return;
+    }
+    
+    isProcessingQueue = true;
+    queueProcessCancelled = false;
+    
+    notifyUser('🚀 Processing Queue', `Starting to scan ${pendingItems.length} URLs...`);
+    console.log(`Processing URLScan queue: ${pendingItems.length} URLs`);
+    
+    let completed = 0;
+    let failed = 0;
+    
+    for (const item of pendingItems) {
+        if (queueProcessCancelled) {
+            notifyUser('⚠️ Queue Cancelled', 'Queue processing stopped by user');
+            break;
+        }
+        
+        // Update status to scanning
+        item.status = 'scanning';
+        await saveUrlScanQueue(queue);
+        
+        try {
+            console.log(`Scanning ${completed + 1}/${pendingItems.length}: ${item.url}`);
+            notifyUser('🔍 Scanning', `Processing ${completed + 1}/${pendingItems.length}: ${item.url.substring(0, 50)}...`);
+            
+            // Scan the URL
+            await sendToUrlscan(item.url, true);
+            
+            item.status = 'completed';
+            completed++;
+        } catch (error) {
+            console.error('Failed to scan:', item.url, error);
+            item.status = 'failed';
+            item.error = error.message;
+            failed++;
+        }
+        
+        await saveUrlScanQueue(queue);
+        
+        // Rate limiting: wait 2.5 seconds between scans
+        if (completed + failed < pendingItems.length) {
+            await new Promise(resolve => setTimeout(resolve, 2500));
+        }
+    }
+    
+    isProcessingQueue = false;
+    
+    // Final notification
+    if (failed === 0) {
+        notifySuccess(`✓ Queue Complete! Successfully scanned all ${completed} URLs`);
+    } else {
+        notifyUser('⚠️ Queue Complete', `Scanned ${completed} URLs, ${failed} failed`);
+    }
+    
+    console.log(`Queue processing complete: ${completed} success, ${failed} failed`);
+}
+
+/**
+ * Clear URLScan queue
+ */
+async function clearUrlScanQueue() {
+    await saveUrlScanQueue([]);
+    await createContextMenus(); // Update menu to remove count
+    notifySuccess('Queue cleared');
+    console.log('URLScan queue cleared');
+}
+
+/**
  * Create context menus based on available integrations
  */
 async function createContextMenus() {
