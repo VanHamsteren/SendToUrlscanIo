@@ -294,11 +294,14 @@ async function createContextMenus() {
         await browser.contextMenus.removeAll();
         console.log('Creating context menus...');
 
+        // Contexts where menus should appear: links and selected text
+        const contexts = ['link', 'selection'];
+
         // Create parent "Security" menu
         browser.contextMenus.create({
             id: 'security-parent',
             title: 'Security Analysis',
-            contexts: ['link']
+            contexts: contexts
         });
 
         // Add URLScan.io option
@@ -322,7 +325,7 @@ async function createContextMenus() {
                 id: 'nextdns-parent',
                 parentId: 'security-parent',
                 title: 'NextDNS',
-                contexts: ['link']
+                contexts: contexts
             });
 
             // Create "Add to blocklist" submenu
@@ -330,7 +333,7 @@ async function createContextMenus() {
                 id: 'nextdns-blocklist',
                 parentId: 'nextdns-parent',
                 title: '🚫 Add to Blocklist',
-                contexts: ['link']
+                contexts: contexts
             });
 
             // Create "Add to allowlist" submenu
@@ -338,28 +341,40 @@ async function createContextMenus() {
                 id: 'nextdns-allowlist',
                 parentId: 'nextdns-parent',
                 title: '✓ Add to Allowlist',
-                contexts: ['link']
+                contexts: contexts
             });
 
             // Add profile options for blocklist
-            nextDnsProfiles.forEach((profile) => {
-                browser.contextMenus.create({
-                    id: `nextdns-blocklist-${profile.id}`,
-                    parentId: 'nextdns-blocklist',
-                    title: profile.name || profile.id,
-                    contexts: ['link']
-                });
-            });
+            console.log('Creating blocklist profile menus...');
+            for (const profile of nextDnsProfiles) {
+                try {
+                    browser.contextMenus.create({
+                        id: `nextdns-blocklist-${profile.id}`,
+                        parentId: 'nextdns-blocklist',
+                        title: profile.name || profile.id,
+                        contexts: contexts
+                    });
+                    console.log(`  ✓ Created blocklist menu for: ${profile.name || profile.id}`);
+                } catch (err) {
+                    console.error(`  ✗ Failed to create blocklist menu for ${profile.id}:`, err);
+                }
+            }
 
             // Add profile options for allowlist
-            nextDnsProfiles.forEach((profile) => {
-                browser.contextMenus.create({
-                    id: `nextdns-allowlist-${profile.id}`,
-                    parentId: 'nextdns-allowlist',
-                    title: profile.name || profile.id,
-                    contexts: ['link']
-                });
-            });
+            console.log('Creating allowlist profile menus...');
+            for (const profile of nextDnsProfiles) {
+                try {
+                    browser.contextMenus.create({
+                        id: `nextdns-allowlist-${profile.id}`,
+                        parentId: 'nextdns-allowlist',
+                        title: profile.name || profile.id,
+                        contexts: contexts
+                    });
+                    console.log(`  ✓ Created allowlist menu for: ${profile.name || profile.id}`);
+                } catch (err) {
+                    console.error(`  ✗ Failed to create allowlist menu for ${profile.id}:`, err);
+                }
+            }
 
             console.log(`✓ Created NextDNS menus for ${nextDnsProfiles.length} profiles`);
         } else {
@@ -371,14 +386,14 @@ async function createContextMenus() {
             id: 'separator',
             parentId: 'security-parent',
             type: 'separator',
-            contexts: ['link']
+            contexts: contexts
         });
 
         browser.contextMenus.create({
             id: 'more-tools',
             parentId: 'security-parent',
             title: '⚙️ Configure Tools',
-            contexts: ['link']
+            contexts: contexts
         });
 
         console.log('✓ Context menus created successfully');
