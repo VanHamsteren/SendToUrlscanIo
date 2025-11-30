@@ -197,4 +197,10 @@ browser.contextMenus.onClicked.addListener((info) => {
     }
 });
 
+// ---- Toolbar Button Action ----
+// Open options page when toolbar icon is clicked
+browser.action.onClicked.addListener(() => {
+    browser.runtime.openOptionsPage();
+});
+
 console.log('URLScan.io extension loaded successfully');
