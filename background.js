@@ -1,3 +1,4 @@
+/* global browser */
 /**
  * URLScan.io Firefox Extension - Background Service Worker
  * Handles URL scanning submissions and result polling
