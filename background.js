@@ -407,20 +407,36 @@ async function createContextMenus() {
  */
 browser.contextMenus.onClicked.addListener(async (info) => {
     const menuItemId = info.menuItemId;
+    
+    // Get URL/domain from either link or selected text
     const linkUrl = info.linkUrl;
+    const selectedText = info.selectionText?.trim();
+    
+    // Determine the target (prefer link over selection)
+    const target = linkUrl || selectedText;
+    
+    if (!target) {
+        console.log('No link or selected text found');
+        return;
+    }
 
-    if (!linkUrl) return;
+    console.log('Context menu clicked:', {
+        menuItemId,
+        linkUrl,
+        selectedText,
+        target
+    });
 
     // URLScan.io
     if (menuItemId === 'urlscan-submit') {
-        console.log('Scanning URL:', linkUrl);
-        sendToUrlscan(linkUrl);
+        console.log('Scanning URL:', target);
+        sendToUrlscan(target);
     }
     // NextDNS blocklist
     else if (menuItemId.startsWith('nextdns-blocklist-')) {
         const profileId = menuItemId.replace('nextdns-blocklist-', '');
         const profile = nextDnsProfiles.find(p => p.id === profileId);
-        const domain = extractDomain(linkUrl);
+        const domain = extractDomain(target);
         console.log(`Adding ${domain} to blocklist for profile ${profileId}`);
         addToNextDnsList(profileId, profile?.name || profileId, domain, 'denylist');
     }
@@ -428,7 +444,7 @@ browser.contextMenus.onClicked.addListener(async (info) => {
     else if (menuItemId.startsWith('nextdns-allowlist-')) {
         const profileId = menuItemId.replace('nextdns-allowlist-', '');
         const profile = nextDnsProfiles.find(p => p.id === profileId);
-        const domain = extractDomain(linkUrl);
+        const domain = extractDomain(target);
         console.log(`Adding ${domain} to allowlist for profile ${profileId}`);
         addToNextDnsList(profileId, profile?.name || profileId, domain, 'allowlist');
     }
