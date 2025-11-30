@@ -83,8 +83,15 @@ The extension intelligently handles various formats:
 | `https://example.com/path` | `example.com` |
 | `example.com` | `example.com` |
 | `urlscan.io/domain/malware.com` | `malware.com` |
+| `outlook.com/?url=http%3A%2F%2Fmalware.com` | `malware.com` ⭐ |
 | `subdomain.example.com` | `subdomain.example.com` |
 | `Check malware.com here` | `malware.com` |
+
+**NEW: Outlook Safe Links Support**
+- Automatically unwraps Microsoft Outlook protection links
+- Extracts the real destination URL
+- Works with all regional variants (EMEA, NAM, APAC, etc.)
+- See [OUTLOOK_SANITIZER.md](OUTLOOK_SANITIZER.md) for details
 
 ### Which Method to Use?
 
