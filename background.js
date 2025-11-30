@@ -417,11 +417,17 @@ browser.action.onClicked.addListener(() => {
 // Create context menus on extension load
 createContextMenus();
 
-// Listen for storage changes to update menus
+// Listen for storage changes to update menus dynamically
 browser.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName === 'sync' && changes.nextdnsApiKey) {
-        console.log('NextDNS API key changed, recreating menus...');
-        createContextMenus();
+    if (areaName === 'sync') {
+        // Recreate menus if any relevant setting changed
+        if (changes.nextdnsApiKey || changes.urlscanApiKey) {
+            console.log('Settings changed, recreating menus...');
+            // Small delay to ensure storage is updated
+            setTimeout(() => {
+                createContextMenus();
+            }, 500);
+        }
     }
 });
 
