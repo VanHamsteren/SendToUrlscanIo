@@ -695,10 +695,20 @@ browser.contextMenus.onClicked.addListener(async (info) => {
         target
     });
 
-    // URLScan.io
+    // URLScan.io - Scan Now
     if (menuItemId === 'urlscan-submit') {
         console.log('Scanning URL:', target);
         sendToUrlscan(target);
+    }
+    // URLScan.io - Add to Queue
+    else if (menuItemId === 'urlscan-queue-add') {
+        console.log('Adding to scan queue:', target);
+        addToUrlScanQueue(target);
+    }
+    // URLScan.io - Process Queue
+    else if (menuItemId === 'urlscan-queue-process') {
+        console.log('Processing scan queue');
+        processUrlScanQueue();
     }
     // NextDNS - Add to ALL profiles (blocklist)
     else if (menuItemId === 'nextdns-blocklist-all') {
