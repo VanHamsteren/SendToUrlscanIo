@@ -32,7 +32,7 @@ A professional Firefox extension that allows users to quickly submit URLs for se
    - Generate your API key from your [profile page](https://urlscan.io/user/profile/)
 
 2. **Configure Extension**:
-   - Click the extension icon or access settings from the extensions menu
+   - Click the URLScan.io extension icon in your Firefox toolbar
    - Enter your API key
    - Choose scan visibility (Public/Unlisted/Private)
    - Optionally customize tags (default: `firefox, extension`)
