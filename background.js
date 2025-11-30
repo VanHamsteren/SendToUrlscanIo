@@ -249,94 +249,102 @@ async function fetchNextDnsProfiles() {
  * Create context menus based on available integrations
  */
 async function createContextMenus() {
-    // Remove all existing menus
-    await browser.contextMenus.removeAll();
+    try {
+        // Remove all existing menus
+        await browser.contextMenus.removeAll();
+        console.log('Creating context menus...');
 
-    // Create parent "Security" menu
-    browser.contextMenus.create({
-        id: 'security-parent',
-        title: 'Security Analysis',
-        contexts: ['link']
-    });
-
-    // Add URLScan.io option
-    browser.contextMenus.create({
-        id: 'urlscan-submit',
-        parentId: 'security-parent',
-        title: 'Scan with URLScan.io',
-        contexts: ['link'],
-        icons: {
-            16: 'icons/urlscan_16.png'
-        }
-    });
-
-    // Fetch NextDNS profiles
-    nextDnsProfiles = await fetchNextDnsProfiles();
-
-    if (nextDnsProfiles.length > 0) {
-        // Create NextDNS parent menu
+        // Create parent "Security" menu
         browser.contextMenus.create({
-            id: 'nextdns-parent',
+            id: 'security-parent',
+            title: 'Security Analysis',
+            contexts: ['link']
+        });
+
+        // Add URLScan.io option
+        browser.contextMenus.create({
+            id: 'urlscan-submit',
             parentId: 'security-parent',
-            title: 'NextDNS',
-            contexts: ['link']
+            title: 'Scan with URLScan.io',
+            contexts: ['link'],
+            icons: {
+                16: 'icons/urlscan_16.png'
+            }
         });
 
-        // Create "Add to blocklist" submenu
-        browser.contextMenus.create({
-            id: 'nextdns-blocklist',
-            parentId: 'nextdns-parent',
-            title: '🚫 Add to Blocklist',
-            contexts: ['link']
-        });
+        // Fetch NextDNS profiles
+        nextDnsProfiles = await fetchNextDnsProfiles();
+        console.log(`Fetched ${nextDnsProfiles.length} NextDNS profiles`);
 
-        // Create "Add to allowlist" submenu
-        browser.contextMenus.create({
-            id: 'nextdns-allowlist',
-            parentId: 'nextdns-parent',
-            title: '✓ Add to Allowlist',
-            contexts: ['link']
-        });
-
-        // Add profile options for blocklist
-        nextDnsProfiles.forEach((profile) => {
+        if (nextDnsProfiles.length > 0) {
+            // Create NextDNS parent menu
             browser.contextMenus.create({
-                id: `nextdns-blocklist-${profile.id}`,
-                parentId: 'nextdns-blocklist',
-                title: profile.name || profile.id,
+                id: 'nextdns-parent',
+                parentId: 'security-parent',
+                title: 'NextDNS',
                 contexts: ['link']
             });
-        });
 
-        // Add profile options for allowlist
-        nextDnsProfiles.forEach((profile) => {
+            // Create "Add to blocklist" submenu
             browser.contextMenus.create({
-                id: `nextdns-allowlist-${profile.id}`,
-                parentId: 'nextdns-allowlist',
-                title: profile.name || profile.id,
+                id: 'nextdns-blocklist',
+                parentId: 'nextdns-parent',
+                title: '🚫 Add to Blocklist',
                 contexts: ['link']
             });
+
+            // Create "Add to allowlist" submenu
+            browser.contextMenus.create({
+                id: 'nextdns-allowlist',
+                parentId: 'nextdns-parent',
+                title: '✓ Add to Allowlist',
+                contexts: ['link']
+            });
+
+            // Add profile options for blocklist
+            nextDnsProfiles.forEach((profile) => {
+                browser.contextMenus.create({
+                    id: `nextdns-blocklist-${profile.id}`,
+                    parentId: 'nextdns-blocklist',
+                    title: profile.name || profile.id,
+                    contexts: ['link']
+                });
+            });
+
+            // Add profile options for allowlist
+            nextDnsProfiles.forEach((profile) => {
+                browser.contextMenus.create({
+                    id: `nextdns-allowlist-${profile.id}`,
+                    parentId: 'nextdns-allowlist',
+                    title: profile.name || profile.id,
+                    contexts: ['link']
+                });
+            });
+
+            console.log(`✓ Created NextDNS menus for ${nextDnsProfiles.length} profiles`);
+        } else {
+            console.log('No NextDNS profiles found (API key may not be configured)');
+        }
+
+        // Add separator and future tools hint
+        browser.contextMenus.create({
+            id: 'separator',
+            parentId: 'security-parent',
+            type: 'separator',
+            contexts: ['link']
         });
 
-        console.log(`Created NextDNS menus for ${nextDnsProfiles.length} profiles`);
+        browser.contextMenus.create({
+            id: 'more-tools',
+            parentId: 'security-parent',
+            title: '⚙️ Configure Tools',
+            contexts: ['link']
+        });
+
+        console.log('✓ Context menus created successfully');
+    } catch (error) {
+        console.error('Error creating context menus:', error);
     }
-
-    // Add separator and future tools hint
-    browser.contextMenus.create({
-        id: 'separator',
-        parentId: 'security-parent',
-        type: 'separator',
-        contexts: ['link']
-    });
-
-    browser.contextMenus.create({
-        id: 'more-tools',
-        parentId: 'security-parent',
-        title: '⚙️ Configure Tools',
-        contexts: ['link']
-    });
-
-    console.log('Context menus created successfully');
 }
 
 /**
