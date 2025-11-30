@@ -22,11 +22,12 @@
         "256": "icons/urlscan_256.png"
     },
     "action": {
+        "default_popup": "popup.html",
         "default_icon": {
             "16": "icons/urlscan_16.png",
             "32": "icons/urlscan_32.png"
         },
-        "default_title": "URLScan.io - Click to configure"
+        "default_title": "Security Tools - Quick Access"
     },
     "options_ui": {
         "page": "options.html",
