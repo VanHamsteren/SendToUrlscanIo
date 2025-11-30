@@ -7,6 +7,10 @@
 // Store profiles for menu creation
 let nextDnsProfiles = [];
 
+// URLScan queue processing state
+let isProcessingQueue = false;
+let queueProcessCancelled = false;
+
 /**
  * Submit a URL to urlscan.io for scanning
  * @param {string} url - The URL to scan
