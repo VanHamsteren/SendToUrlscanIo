@@ -140,7 +140,17 @@ To test the extension:
 
 ## Changelog
 
-### Version 1.1.0 (Current)
+### Version 1.2.0 (Current)
+- ✨ Added NextDNS integration
+- ✨ Added blocklist/allowlist management
+- ✨ Dynamic profile loading and selection
+- ✨ Reorganized context menu with "Security Analysis" parent
+- ✨ Added profile display in settings
+- 🎨 Enhanced UI with NextDNS configuration
+- 📝 Comprehensive documentation for NextDNS
+- 🔄 Menu structure supports future integrations
+
+### Version 1.1.0
 - ✨ Upgraded to Manifest V3
 - ✨ Added customizable tags feature (defaults: firefox, extension)
 - 🐛 Fixed polling delay bug
