@@ -220,27 +220,36 @@ async function fetchNextDnsProfiles() {
         const { nextdnsApiKey: apiKey } = await browser.storage.sync.get(['nextdnsApiKey']);
 
         if (!apiKey) {
-            console.log('NextDNS API key not configured');
+            console.log('NextDNS API key not configured in storage');
             return [];
         }
 
+        console.log('Fetching NextDNS profiles with API key length:', apiKey.length);
+        
         const response = await fetch('https://api.nextdns.io/profiles', {
             headers: {
                 'X-Api-Key': apiKey
             }
         });
 
+        console.log('NextDNS API response status:', response.status);
+
         if (response.ok) {
             const data = await response.json();
-            console.log('NextDNS profiles fetched:', data.data?.length || 0);
-            return data.data || [];
+            const profiles = data.data || [];
+            console.log('NextDNS profiles fetched successfully:', profiles.length, 'profiles');
+            if (profiles.length > 0) {
+                console.log('Profile names:', profiles.map(p => p.name || p.id).join(', '));
+            }
+            return profiles;
         } else {
-            console.error('Failed to fetch NextDNS profiles:', response.status);
+            const errorText = await response.text().catch(() => 'No error text');
+            console.error('Failed to fetch NextDNS profiles. Status:', response.status, 'Error:', errorText);
             return [];
         }
 
     } catch (error) {
-        console.error('Error fetching NextDNS profiles:', error);
+        console.error('Exception while fetching NextDNS profiles:', error.message, error);
         return [];
     }
 }
