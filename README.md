@@ -1,15 +1,30 @@
-# URLScan.io Firefox Extension
+# Security Tools Firefox Extension
 
-A professional Firefox extension that allows users to quickly submit URLs for security analysis using urlscan.io's powerful scanning service.
+A professional Firefox extension that integrates multiple security analysis tools directly into your browser's context menu. Analyze links with URLScan.io, manage DNS filtering with NextDNS, and more.
 
 ## Features
 
-- 🔒 **Right-Click Security Scanning**: Context menu integration for quick URL scanning
-- ⚙️ **Customizable Settings**: Configure API key, scan visibility, and custom tags
-- 🎨 **Professional UI**: Modern, clean interface matching urlscan.io branding
+- 🔒 **URLScan.io Integration**: Comprehensive website security scanning
+- 🛡️ **NextDNS Integration**: DNS-level blocklist/allowlist management  
+- 📱 **Multi-Profile Support**: Manage multiple NextDNS profiles
+- ⚙️ **Easy Configuration**: Simple settings page with real-time validation
+- 🎨 **Professional UI**: Modern, clean interface
 - 🔐 **Secure Storage**: API keys stored locally in Firefox's secure storage
-- 📊 **Automatic Results**: Opens scan results automatically when ready
-- 🏷️ **Custom Tagging**: Organize your scans with custom tags
+- 📊 **Extensible**: More security tools coming soon
+
+## Current Integrations
+
+### 1. URLScan.io
+- Detailed website security analysis
+- Screenshot and HTTP request inspection
+- Malware and phishing detection
+- Automatic result opening
+
+### 2. NextDNS  
+- Add domains to blocklists (DNS-level blocking)
+- Add domains to allowlists (ensure access)
+- Dynamic profile selection
+- Instant network-wide protection
 
 ## Installation
 
