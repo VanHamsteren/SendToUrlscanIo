@@ -20,6 +20,7 @@ const saveButton = document.getElementById('save');
 const resetButton = document.getElementById('reset');
 const togglePasswordBtn = document.getElementById('toggleApiKey');
 const toggleNextDnsBtn = document.getElementById('toggleNextDnsKey');
+const testNextDnsBtn = document.getElementById('testNextDns');
 const statusDiv = document.getElementById('status');
 const apiKeyError = document.getElementById('apiKeyError');
 const nextdnsKeyError = document.getElementById('nextdnsKeyError');
