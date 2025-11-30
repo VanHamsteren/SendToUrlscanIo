@@ -71,7 +71,7 @@ function showFieldError(input, errorElement, show) {
 }
 
 /**
- * Fetch and display NextDNS profiles
+ * Fetch and display NextDNS profiles via background script
  */
 async function fetchAndDisplayProfiles() {
     const apiKey = nextdnsApiKeyInput.value.trim();
@@ -82,29 +82,22 @@ async function fetchAndDisplayProfiles() {
     }
 
     try {
-        const response = await fetch('https://api.nextdns.io/profiles', {
-            headers: {
-                'X-Api-Key': apiKey
-            }
+        // Send message to background script to test connection
+        const response = await browser.runtime.sendMessage({
+            action: 'testNextDnsConnection',
+            apiKey: apiKey
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            const profiles = data.data || [];
-            
-            if (profiles.length > 0) {
-                profilesList.innerHTML = profiles
-                    .map(p => `<li>• ${p.name || p.id} (${p.id})</li>`)
-                    .join('');
-                profilesInfo.classList.add('show');
-            } else {
-                profilesInfo.classList.remove('show');
-            }
+        if (response.success && response.profiles.length > 0) {
+            profilesList.innerHTML = response.profiles
+                .map(p => `<li>• ${p.name || p.id} (${p.id})</li>`)
+                .join('');
+            profilesInfo.classList.add('show');
         } else {
             profilesInfo.classList.remove('show');
         }
     } catch (error) {
-        console.error('Error fetching profiles:', error);
+        console.error('Error fetching profiles via background:', error);
         profilesInfo.classList.remove('show');
     }
 }
